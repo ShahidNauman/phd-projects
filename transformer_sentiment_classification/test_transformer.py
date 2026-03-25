@@ -292,7 +292,7 @@ class TestCollate:
         input_ids, mask, _ = collate_fn(batch)
         # Where input_ids == 0 (padding), mask should be True.
         pad_positions = input_ids == 0
-        assert (mask[pad_positions] == True).all()  # noqa: E712
+        assert mask[pad_positions].all()
 
 
 class TestGetDataloaders:
