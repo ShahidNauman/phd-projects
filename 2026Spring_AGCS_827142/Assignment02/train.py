@@ -88,16 +88,32 @@ def run_epoch(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train Transformer sentiment classifier")
-    parser.add_argument("--epochs", type=int, default=30, help="Number of training epochs")
+    parser = argparse.ArgumentParser(
+        description="Train Transformer sentiment classifier"
+    )
+    parser.add_argument(
+        "--epochs", type=int, default=30, help="Number of training epochs"
+    )
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate")
     parser.add_argument("--batch-size", type=int, default=8, help="Batch size")
-    parser.add_argument("--embed-dim", type=int, default=128, help="Model embedding dimension")
-    parser.add_argument("--num-heads", type=int, default=4, help="Number of attention heads")
-    parser.add_argument("--num-layers", type=int, default=2, help="Number of encoder layers")
-    parser.add_argument("--ff-dim", type=int, default=256, help="Feed-forward inner dimension")
-    parser.add_argument("--max-len", type=int, default=64, help="Maximum sequence length")
-    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout probability")
+    parser.add_argument(
+        "--embed-dim", type=int, default=128, help="Model embedding dimension"
+    )
+    parser.add_argument(
+        "--num-heads", type=int, default=4, help="Number of attention heads"
+    )
+    parser.add_argument(
+        "--num-layers", type=int, default=2, help="Number of encoder layers"
+    )
+    parser.add_argument(
+        "--ff-dim", type=int, default=256, help="Feed-forward inner dimension"
+    )
+    parser.add_argument(
+        "--max-len", type=int, default=64, help="Maximum sequence length"
+    )
+    parser.add_argument(
+        "--dropout", type=float, default=0.1, help="Dropout probability"
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     return parser.parse_args()
 
@@ -113,8 +129,8 @@ def train(args: argparse.Namespace) -> None:
         max_len=args.max_len,
     )
     print(f"Vocabulary size : {tokenizer.vocab_size}")
-    print(f"Training samples: {len(train_loader.dataset)}")
-    print(f"Validation samples: {len(val_loader.dataset)}\n")
+    print(f"Training samples: {len(train_loader.dataset)}")  # type: ignore
+    print(f"Validation samples: {len(val_loader.dataset)}\n")  # type: ignore
 
     # ---- Model --------------------------------------------------------------
     model = TransformerClassifier(
@@ -138,13 +154,19 @@ def train(args: argparse.Namespace) -> None:
 
     # ---- Training loop ------------------------------------------------------
     best_val_acc = 0.0
-    print(f"{'Epoch':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Time':>6}")
+    print(
+        f"{'Epoch':>6} | {'Train Loss':>10} | {'Train Acc':>9} | {'Val Loss':>8} | {'Val Acc':>7} | {'Time':>6}"
+    )
     print("-" * 65)
 
     for epoch in range(1, args.epochs + 1):
         t0 = time.time()
-        train_loss, train_acc = run_epoch(model, train_loader, criterion, optimizer, device, train=True)
-        val_loss, val_acc = run_epoch(model, val_loader, criterion, None, device, train=False)
+        train_loss, train_acc = run_epoch(
+            model, train_loader, criterion, optimizer, device, train=True
+        )
+        val_loss, val_acc = run_epoch(
+            model, val_loader, criterion, None, device, train=False
+        )
         scheduler.step()
         elapsed = time.time() - t0
 

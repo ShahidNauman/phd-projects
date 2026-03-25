@@ -52,21 +52,23 @@ class PositionalEncoding(nn.Module):
         dropout: Dropout probability applied after adding positional encoding.
     """
 
-    def __init__(self, embed_dim: int, max_len: int = 512, dropout: float = 0.1) -> None:
+    def __init__(
+        self, embed_dim: int, max_len: int = 512, dropout: float = 0.1
+    ) -> None:
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
 
         # Build (max_len, embed_dim) matrix of sinusoidal values.
-        position = torch.arange(max_len).unsqueeze(1)          # (max_len, 1)
+        position = torch.arange(max_len).unsqueeze(1)  # (max_len, 1)
         div_term = torch.exp(
             torch.arange(0, embed_dim, 2) * (-math.log(10000.0) / embed_dim)
-        )                                                         # (embed_dim/2,)
+        )  # (embed_dim/2,)
         pe = torch.zeros(max_len, embed_dim)
-        pe[:, 0::2] = torch.sin(position * div_term)             # even indices
-        pe[:, 1::2] = torch.cos(position * div_term)             # odd indices
+        pe[:, 0::2] = torch.sin(position * div_term)  # even indices
+        pe[:, 1::2] = torch.cos(position * div_term)  # odd indices
         # Register as buffer so it moves with the model (e.g., .to(device)) but
         # is not a learned parameter.
-        self.register_buffer("pe", pe.unsqueeze(0))              # (1, max_len, embed_dim)
+        self.register_buffer("pe", pe.unsqueeze(0))  # (1, max_len, embed_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -76,7 +78,7 @@ class PositionalEncoding(nn.Module):
         Returns:
             Tensor of the same shape with positional information added.
         """
-        x = x + self.pe[:, : x.size(1)]
+        x = x + self.pe[:, : x.size(1), :]  # type: ignore
         return self.dropout(x)
 
 
@@ -123,8 +125,8 @@ class MultiHeadAttention(nn.Module):
         B, T, C = x.shape
 
         # Project input to Q, K, V and split into heads.
-        qkv = self.qkv_proj(x)                            # (B, T, 3*C)
-        q, k, v = qkv.split(self.embed_dim, dim=-1)       # each: (B, T, C)
+        qkv = self.qkv_proj(x)  # (B, T, 3*C)
+        q, k, v = qkv.split(self.embed_dim, dim=-1)  # each: (B, T, C)
 
         # Reshape to (B, num_heads, T, head_dim).
         def split_heads(t: torch.Tensor) -> torch.Tensor:
@@ -145,7 +147,7 @@ class MultiHeadAttention(nn.Module):
         attn_weights = self.attn_dropout(attn_weights)
 
         # Weighted sum of values.
-        context = torch.matmul(attn_weights, v)            # (B, h, T, head_dim)
+        context = torch.matmul(attn_weights, v)  # (B, h, T, head_dim)
 
         # Concatenate heads and project back to embed_dim.
         context = context.transpose(1, 2).contiguous().view(B, T, C)
@@ -244,7 +246,10 @@ class TransformerEncoder(nn.Module):
     ) -> None:
         super().__init__()
         self.layers = nn.ModuleList(
-            [EncoderLayer(embed_dim, num_heads, ff_dim, dropout) for _ in range(num_layers)]
+            [
+                EncoderLayer(embed_dim, num_heads, ff_dim, dropout)
+                for _ in range(num_layers)
+            ]
         )
 
     def forward(
@@ -293,7 +298,9 @@ class TransformerClassifier(nn.Module):
         super().__init__()
         self.token_embedding = TokenEmbedding(vocab_size, embed_dim)
         self.pos_encoding = PositionalEncoding(embed_dim, max_len, dropout)
-        self.encoder = TransformerEncoder(num_layers, embed_dim, num_heads, ff_dim, dropout)
+        self.encoder = TransformerEncoder(
+            num_layers, embed_dim, num_heads, ff_dim, dropout
+        )
         self.classifier = nn.Linear(embed_dim, num_classes)
         self.dropout = nn.Dropout(dropout)
 
@@ -311,11 +318,11 @@ class TransformerClassifier(nn.Module):
         Returns:
             Logits of shape (batch_size, num_classes).
         """
-        x = self.token_embedding(input_ids)    # (B, T, embed_dim)
-        x = self.pos_encoding(x)               # (B, T, embed_dim)
-        x = self.encoder(x, padding_mask)      # (B, T, embed_dim)
+        x = self.token_embedding(input_ids)  # (B, T, embed_dim)
+        x = self.pos_encoding(x)  # (B, T, embed_dim)
+        x = self.encoder(x, padding_mask)  # (B, T, embed_dim)
 
         # Use the [CLS] token (first position) as the sequence representation.
-        cls_repr = x[:, 0, :]                  # (B, embed_dim)
+        cls_repr = x[:, 0, :]  # (B, embed_dim)
         cls_repr = self.dropout(cls_repr)
-        return self.classifier(cls_repr)        # (B, num_classes)
+        return self.classifier(cls_repr)  # (B, num_classes)

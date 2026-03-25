@@ -54,7 +54,9 @@ def load_model(
         ff_dim=ff_dim,
         max_len=max_len,
     ).to(device)
-    model.load_state_dict(torch.load(checkpoint_path, map_location=device, weights_only=True))
+    model.load_state_dict(
+        torch.load(checkpoint_path, map_location=device, weights_only=True)
+    )
     model.eval()
     return model
 
@@ -81,13 +83,13 @@ def predict(
     """
     ids = tokenizer.encode(text, max_len)
     input_ids = torch.tensor([ids], dtype=torch.long, device=device)
-    padding_mask = (input_ids == 0)
+    padding_mask = input_ids == 0
 
     with torch.no_grad():
         logits = model(input_ids, padding_mask)
         probs = torch.softmax(logits, dim=-1)
 
-    pred_class = probs.argmax(dim=-1).item()
+    pred_class = int(probs.argmax(dim=-1).item())
     confidence = probs[0, pred_class].item()
     return LABELS[pred_class], confidence
 
@@ -99,7 +101,9 @@ def predict(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Transformer sentiment inference demo")
-    parser.add_argument("--text", type=str, default=None, help="Single sentence to classify")
+    parser.add_argument(
+        "--text", type=str, default=None, help="Single sentence to classify"
+    )
     parser.add_argument(
         "--checkpoint",
         type=str,
@@ -120,6 +124,7 @@ def main() -> None:
     if not os.path.exists(args.checkpoint):
         print("No checkpoint found — training model first …\n")
         import subprocess
+
         result = subprocess.run(
             [sys.executable, "train.py"],
             cwd=os.path.dirname(os.path.abspath(__file__)),

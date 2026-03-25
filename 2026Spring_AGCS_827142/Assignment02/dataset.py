@@ -151,7 +151,9 @@ class SentimentDataset(Dataset):
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         text, label = self.data[idx]
         ids = self.tokenizer.encode(text, self.max_len)
-        return torch.tensor(ids, dtype=torch.long), torch.tensor(label, dtype=torch.long)
+        return torch.tensor(ids, dtype=torch.long), torch.tensor(
+            label, dtype=torch.long
+        )
 
 
 # ---------------------------------------------------------------------------

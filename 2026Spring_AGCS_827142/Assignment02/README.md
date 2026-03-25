@@ -1,7 +1,7 @@
 # Transformer-Based Sentiment Classification
 
 A real-world use case implementation of the **Transformer** architecture
-applied to **sentiment analysis** (text classification).  Every component of
+applied to **sentiment analysis** (text classification). Every component of
 the Transformer encoder is built from scratch with PyTorch so that each part
 of the architecture can be studied directly in the code.
 
@@ -12,7 +12,7 @@ of the architecture can be studied directly in the code.
 **Goal:** Given a short movie-review sentence, predict whether it expresses a
 **positive** or **negative** sentiment.
 
-This is a classic NLP classification task.  The Transformer encoder converts
+This is a classic NLP classification task. The Transformer encoder converts
 the input token sequence into contextualised representations, and a linear
 head maps the `[CLS]` token's representation to a class label.
 
@@ -73,15 +73,15 @@ Input tokens
 
 ### Component Details
 
-| Component | File | Key idea |
-|-----------|------|----------|
-| **TokenEmbedding** | `transformer.py` | Converts discrete token IDs into continuous d_model-dimensional vectors. Embeddings are scaled by √d_model as in the original paper. |
-| **PositionalEncoding** | `transformer.py` | Adds fixed sinusoidal signals to embeddings so the model can distinguish token positions. Uses `sin` at even dimensions and `cos` at odd dimensions. |
-| **MultiHeadAttention** | `transformer.py` | Computes scaled dot-product attention in `h` parallel subspaces. Each head learns to attend to different aspects of the input. Supports a padding mask to ignore padding tokens. |
-| **FeedForward** | `transformer.py` | Two linear projections with a ReLU activation between them, applied identically to each position. Widens the representation space (inner dim = 4× d_model by default). |
-| **EncoderLayer** | `transformer.py` | One Transformer encoder block: MultiHeadAttention → Add & Norm → FFN → Add & Norm. |
-| **TransformerEncoder** | `transformer.py` | Stacks N `EncoderLayer` modules sequentially. |
-| **TransformerClassifier** | `transformer.py` | Full model: embeddings → positional encoding → N encoder layers → [CLS] pooling → linear classifier. |
+| Component                 | File             | Key idea                                                                                                                                                                         |
+| ------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TokenEmbedding**        | `transformer.py` | Converts discrete token IDs into continuous d_model-dimensional vectors. Embeddings are scaled by √d_model as in the original paper.                                             |
+| **PositionalEncoding**    | `transformer.py` | Adds fixed sinusoidal signals to embeddings so the model can distinguish token positions. Uses `sin` at even dimensions and `cos` at odd dimensions.                             |
+| **MultiHeadAttention**    | `transformer.py` | Computes scaled dot-product attention in `h` parallel subspaces. Each head learns to attend to different aspects of the input. Supports a padding mask to ignore padding tokens. |
+| **FeedForward**           | `transformer.py` | Two linear projections with a ReLU activation between them, applied identically to each position. Widens the representation space (inner dim = 4× d_model by default).           |
+| **EncoderLayer**          | `transformer.py` | One Transformer encoder block: MultiHeadAttention → Add & Norm → FFN → Add & Norm.                                                                                               |
+| **TransformerEncoder**    | `transformer.py` | Stacks N `EncoderLayer` modules sequentially.                                                                                                                                    |
+| **TransformerClassifier** | `transformer.py` | Full model: embeddings → positional encoding → N encoder layers → [CLS] pooling → linear classifier.                                                                             |
 
 ---
 
@@ -166,16 +166,16 @@ py -m pytest test_transformer.py -v
 
 ## Key Hyperparameters
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `embed_dim` | 128 | Model dimensionality (d_model) |
-| `num_heads` | 4 | Number of attention heads |
-| `num_layers` | 2 | Encoder depth (N) |
-| `ff_dim` | 256 | FFN inner dimension |
-| `max_len` | 64 | Maximum sequence length |
-| `dropout` | 0.1 | Dropout probability |
-| `lr` | 3e-4 | AdamW learning rate |
-| `epochs` | 30 | Training epochs |
+| Parameter    | Default | Description                    |
+| ------------ | ------- | ------------------------------ |
+| `embed_dim`  | 128     | Model dimensionality (d_model) |
+| `num_heads`  | 4       | Number of attention heads      |
+| `num_layers` | 2       | Encoder depth (N)              |
+| `ff_dim`     | 256     | FFN inner dimension            |
+| `max_len`    | 64      | Maximum sequence length        |
+| `dropout`    | 0.1     | Dropout probability            |
+| `lr`         | 3e-4    | AdamW learning rate            |
+| `epochs`     | 30      | Training epochs                |
 
 Adjust them via command-line flags:
 
@@ -192,6 +192,7 @@ The core formula of Scaled Dot-Product Attention is:
 $$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$$
 
 Where:
+
 - **Q** (query), **K** (key), **V** (value) are linear projections of the input.
 - Dividing by √d_k prevents the dot products from growing too large in magnitude,
   which would push softmax into regions with very small gradients.
@@ -206,7 +207,7 @@ $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
 
 ## References
 
-- Vaswani, A. et al. (2017). *Attention Is All You Need*. NeurIPS.
+- Vaswani, A. et al. (2017). _Attention Is All You Need_. NeurIPS.
   https://arxiv.org/abs/1706.03762
-- Devlin, J. et al. (2019). *BERT: Pre-training of Deep Bidirectional Transformers*.
+- Devlin, J. et al. (2019). _BERT: Pre-training of Deep Bidirectional Transformers_.
   https://arxiv.org/abs/1810.04805
