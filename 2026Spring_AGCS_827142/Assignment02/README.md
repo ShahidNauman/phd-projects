@@ -88,7 +88,7 @@ Input tokens
 ## Project Structure
 
 ```
-transformer_sentiment_classification/
+2026Spring_AGCS_827142/Assignment02/
 ├── transformer.py      # All Transformer components (core architecture)
 ├── dataset.py          # Tokenizer, SentimentDataset, DataLoader builder
 ├── train.py            # Training loop with logging and checkpointing
@@ -110,7 +110,7 @@ pip install -r requirements.txt
 ### 2. Train the model
 
 ```bash
-cd transformer_sentiment_classification
+cd 2026Spring_AGCS_827142/Assignment02
 python train.py
 ```
 
@@ -155,7 +155,11 @@ Sentiment: POSITIVE 😊  (confidence: 97.3%)
 ### 4. Run the tests
 
 ```bash
-pytest test_transformer.py -v
+# Linux/macOS
+python -m pytest test_transformer.py -v
+
+# Windows (Python launcher)
+py -m pytest test_transformer.py -v
 ```
 
 ---
