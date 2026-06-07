@@ -1,24 +1,31 @@
 # Sarcasm Detection Judge Fine-Tuning
 
-Implementation of the methodology from *LLM-as-a-judge for sarcasm detection using supervised fine-tuning*.
+Implementation of the methodology from _LLM-as-a-judge for sarcasm detection using supervised fine-tuning_.
 
 The project builds a binary sarcasm judge from review/headline datasets, creates grouped train/validation/test splits, fine-tunes a Hugging Face sequence-classification model, and reports paper-style metrics.
 
 ## Quick Start
 
-```powershell
+Create and activate the virtual environment: _(Optional)_
+
+```bash
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.venv/Scripts/Activate.ps1
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 pip install -e .
 ```
 
 Prepare a real CSV dataset with at least `text` and `label` columns. The path below is only an example; the file must exist before you run the command.
 
-```powershell
-mkdir data\raw
-# Put your CSV at data\raw\reviews.csv first.
-python -m sarcasm_judge prepare-csv data\raw\reviews.csv data\processed\reviews
+```bash
+mkdir data/raw
+# Put your CSV at data/raw/reviews.csv first.
+python -m sarcasm_judge prepare-csv data/raw/reviews.csv data/processed/reviews
 ```
 
 Example CSV format:
@@ -37,20 +44,20 @@ For actual fine-tuning, use many more rows. The two labels must both have enough
 
 Fine-tune:
 
-```powershell
-python -m sarcasm_judge train --config configs\reviews_roberta.yaml
+```bash
+python -m sarcasm_judge train --config configs/reviews_roberta.yaml
 ```
 
 Evaluate:
 
-```powershell
-python -m sarcasm_judge evaluate --model-path runs\reviews-roberta\best --dataset-dir data\processed\reviews --split test
+```bash
+python -m sarcasm_judge evaluate --model-path runs/reviews-roberta/best --dataset-dir data/processed/reviews --split test
 ```
 
 Predict:
 
-```powershell
-python -m sarcasm_judge predict --model-path runs\reviews-roberta\best --text "Great, another update that broke everything."
+```bash
+python -m sarcasm_judge predict --model-path runs/reviews-roberta/best --text "Great, another update that broke everything."
 ```
 
 ## Methodology Coverage
@@ -70,29 +77,28 @@ The paper uses the Amazon sarcasm review corpus. If you use `SarcasmAmazonReview
 
 Prepare dataset:
 
-```powershell
-python -m sarcasm_judge prepare-amazon "data\raw\amazon" data\processed\amazon
+```bash
+python -m sarcasm_judge prepare-amazon data/raw/amazon data/processed/amazon
 ```
 
 Fine-tune:
 
-```powershell
-python -m sarcasm_judge train --config configs\amazon_roberta.yaml
+```bash
+python -m sarcasm_judge train --config configs/amazon_roberta.yaml
 ```
 
 Evaluate:
 
-```powershell
-python -m sarcasm_judge evaluate --model-path runs\amazon-roberta\best --dataset-dir data\processed\amazon --split test
+```bash
+python -m sarcasm_judge evaluate --model-path runs/amazon-roberta/best --dataset-dir data/processed/amazon --split test
 ```
 
 Predict:
 
-```powershell
-python -m sarcasm_judge predict --model-path runs\amazon-roberta\best --text "Great, another update that broke everything."
+```bash
+python -m sarcasm_judge predict --model-path runs/amazon-roberta/best --text "Great, another update that broke everything."
 ```
 
 ## Configuration
 
-Edit files in `configs\`. The default model is `roberta-base` because it is practical for coursework hardware. The same pipeline supports larger judge backbones such as DeBERTa, Llama, or Mistral if the local environment has the required memory and dependencies.
-
+Edit files in `configs/`. The default model is `roberta-base` because it is practical for coursework hardware. The same pipeline supports larger judge backbones such as DeBERTa, Llama, or Mistral if the local environment has the required memory and dependencies.
