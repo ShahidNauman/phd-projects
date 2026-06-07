@@ -9,6 +9,9 @@ description = "Supervised fine-tuning pipeline for LLM-as-a-judge sarcasm detect
 readme = "README.md"
 requires-python = ">=3.10"
 
+[project.scripts]
+sarcasm_judge = "sarcasm_judge.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
