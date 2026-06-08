@@ -4,6 +4,7 @@ import sys
 from hsi_analysis.cube_info import print_cube_info
 from hsi_analysis.image_generator import generate_images
 from hsi_analysis.plot_spectra import plot_spectra
+from hsi_analysis.detect_inks import detect_inks
 
 
 def main():
@@ -66,6 +67,17 @@ def main():
         help="Directory to save the generated plot (default: output/images)",
     )
 
+    # detect-inks command
+    detect_parser = subparsers.add_parser(
+        "detect-inks", help="Detect the number of distinct inks present in the document"
+    )
+    detect_parser.add_argument(
+        "--hdr", required=True, help="Path to the ENVI header file (.hdr)"
+    )
+    detect_parser.add_argument(
+        "--raw", required=True, help="Path to the raw binary spectral cube file (.raw)"
+    )
+
     args = parser.parse_args()
 
     if args.command == "cube-info":
@@ -74,6 +86,8 @@ def main():
         generate_images(args)
     elif args.command == "plot-spectra":
         plot_spectra(args)
+    elif args.command == "detect-inks":
+        detect_inks(args)
     else:
         parser.print_help()
         sys.exit(1)
