@@ -1,6 +1,6 @@
 # Project Summary: Sarcasm Detection Judge Fine-Tuning
 
-This project implements a binary sarcasm judge using supervised fine-tuning (SFT) on Hugging Face sequence-classification models (such as RoBERTa or DeBERTa) based on the methodology from the paper **"LLM-as-a-judge for sarcasm detection using supervised fine-tuning."**
+This project implements a binary sarcasm judge using supervised fine-tuning (SFT) on Hugging Face sequence-classification models (such as DistilBERT-SST2 or DeBERTa) based on the methodology from the paper **"LLM-as-a-judge for sarcasm detection using supervised fine-tuning."**
 
 ---
 
@@ -91,7 +91,7 @@ graph TD
 
 ### Step 4: Supervised Fine-Tuning (SFT)
 
-- Trains the backbone classifier (e.g., `roberta-base`) using:
+- Trains the backbone classifier (e.g., `distilbert-base-uncased-finetuned-sst-2-english`) using:
   - **Label Smoothing:** Smooths hard target distributions to reduce model overconfidence.
   - **Cosine LR Decay:** Slowly reduces the learning rate over epochs.
   - **Weight Decay:** Penalizes large model weights to mitigate overfitting.

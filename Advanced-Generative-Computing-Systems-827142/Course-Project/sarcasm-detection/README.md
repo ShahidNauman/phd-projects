@@ -45,19 +45,19 @@ For actual fine-tuning, use many more rows. The two labels must both have enough
 Fine-tune:
 
 ```bash
-python -m sarcasm_judge train --config configs/reviews_roberta.yaml
+python -m sarcasm_judge train --config configs/reviews_distilbert.yaml
 ```
 
 Evaluate:
 
 ```bash
-python -m sarcasm_judge evaluate --model-path runs/reviews-roberta/best --dataset-dir data/processed/reviews --split test
+python -m sarcasm_judge evaluate --model-path runs/reviews-distilbert/best --dataset-dir data/processed/reviews --split test
 ```
 
 Predict:
 
 ```bash
-python -m sarcasm_judge predict --model-path runs/reviews-roberta/best --text "Great, another update that broke everything."
+python -m sarcasm_judge predict --model-path runs/reviews-distilbert/best --text "Great, another update that broke everything."
 ```
 
 ## Methodology Coverage
@@ -84,21 +84,21 @@ python -m sarcasm_judge prepare-amazon data/raw/amazon data/processed/amazon
 Fine-tune:
 
 ```bash
-python -m sarcasm_judge train --config configs/amazon_roberta.yaml
+python -m sarcasm_judge train --config configs/amazon_distilbert.yaml
 ```
 
 Evaluate:
 
 ```bash
-python -m sarcasm_judge evaluate --model-path runs/amazon-roberta/best --dataset-dir data/processed/amazon --split test
+python -m sarcasm_judge evaluate --model-path runs/amazon-distilbert/best --dataset-dir data/processed/amazon --split test
 ```
 
 Predict:
 
 ```bash
-python -m sarcasm_judge predict --model-path runs/amazon-roberta/best --text "Great, another update that broke everything."
+python -m sarcasm_judge predict --model-path runs/amazon-distilbert/best --text "Great, another update that broke everything."
 ```
 
 ## Configuration
 
-Edit files in `configs/`. The default model is `roberta-base` because it is practical for coursework hardware. The same pipeline supports larger judge backbones such as DeBERTa, Llama, or Mistral if the local environment has the required memory and dependencies.
+Edit files in `configs/`. The default model is `distilbert-base-uncased-finetuned-sst-2-english` because it is practical for coursework hardware. The same pipeline supports larger judge backbones such as DeBERTa, Llama, or Mistral if the local environment has the required memory and dependencies.
