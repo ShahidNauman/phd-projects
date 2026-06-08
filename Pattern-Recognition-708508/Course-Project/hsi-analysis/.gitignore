@@ -214,3 +214,4 @@ output/images/*
 !output/images/band_30.png
 !output/images/band_60.png
 !output/images/band_149.png
+!output/images/spectral_reflectance.png
