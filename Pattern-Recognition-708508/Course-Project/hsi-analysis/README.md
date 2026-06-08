@@ -148,9 +148,9 @@ _Note: You can pass `--band` multiple times. It supports integers ($1$-based ind
 
 #### Output Files:
 
-|            Band 1 (first)            |                Band 30                 |                Band 60                 |             Band 149 (last)              |
-| :----------------------------------: | :------------------------------------: | :------------------------------------: | :--------------------------------------: |
-| ![Band 1](/output/images/band_1.png) | ![Band 30](/output/images/band_30.png) | ![Band 60](/output/images/band_60.png) | ![Band 149](/output/images/band_149.png) |
+|                                       Band 1 (first)                                        |                                            Band 30                                            |                                            Band 60                                            |                                         Band 149 (last)                                         |
+| :-----------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
+| ![Band 1](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/band_1.png) | ![Band 30](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/band_30.png) | ![Band 60](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/band_60.png) | ![Band 149](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/band_149.png) |
 
 ---
 
@@ -179,7 +179,7 @@ hsi-analysis plot-spectra --hdr data/sample.hdr --raw data/sample.raw -o output/
 
 #### Output Files:
 
-![Spectral Reflectance](/output/images/spectral_reflectance.png)
+![Spectral Reflectance](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/spectral_reflectance.png)
 
 ---
 
@@ -228,9 +228,9 @@ Optimal Number of Ink Clusters Detected: 2 (Silhouette = 0.6787)
 
 #### Output Files:
 
-|                 Original K=2 (Optimal)                 |                      Original K=3                      |                      Original K=5                      |
-| :----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: |
-| ![Original K=2](/output/images/classified_inks_k2.png) | ![Original K=3](/output/images/classified_inks_k3.png) | ![Original K=5](/output/images/classified_inks_k5.png) |
+|                                            Original K=2 (Optimal)                                             |                                                 Original K=3                                                  |                                                 Original K=5                                                  |
+| :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+| ![Original K=2](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_k2.png) | ![Original K=3](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_k3.png) | ![Original K=5](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_k5.png) |
 
 ---
 
@@ -274,13 +274,13 @@ PC 3       | 0.007641                 | 0.994431
 
 ##### Principal Components & Composite
 
-|                    PCA Component 1                     |                    PCA Component 2                     |                    PCA Component 3                     |                   PCA RGB Composite                    |
-| :----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: |
-| ![PCA Component 1](/output/images/pca_component_1.png) | ![PCA Component 2](/output/images/pca_component_2.png) | ![PCA Component 3](/output/images/pca_component_3.png) | ![PCA RGB Composite](/output/images/pca_composite.png) |
+|                                                PCA Component 1                                                |                                                PCA Component 2                                                |                                                PCA Component 3                                                |                                               PCA RGB Composite                                               |
+| :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+| ![PCA Component 1](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/pca_component_1.png) | ![PCA Component 2](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/pca_component_2.png) | ![PCA Component 3](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/pca_component_3.png) | ![PCA RGB Composite](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/pca_composite.png) |
 
 ##### Explained Variance Metrics
 
-![PCA Variance Scree Plot](/output/images/pca_variance_plot.png)
+![PCA Variance Scree Plot](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/pca_variance_plot.png)
 
 ---
 
@@ -295,7 +295,7 @@ PCA is restricted to linear orthogonal projections. The CAE learns non-linear re
 #### CLI Command:
 
 ```bash
-hsi-analysis reduce-dimensions --hdr data/sample.hdr --raw data/sample.raw --components 3 --using cae -o output/images
+hsi-analysis reduce-dimensions --components 3 --using cae --hdr data/sample.hdr --raw data/sample.raw -o output/images
 ```
 
 #### Under the Hood:
@@ -323,13 +323,13 @@ hsi-analysis reduce-dimensions --hdr data/sample.hdr --raw data/sample.raw --com
 
 ##### Latent Bottleneck Components & Composite
 
-|                     CAE Channel 1                      |                     CAE Channel 2                      |                     CAE Channel 3                      |                   CAE RGB Composite                    |
-| :----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: | :----------------------------------------------------: |
-| ![CAE Component 1](/output/images/cae_component_1.png) | ![CAE Component 2](/output/images/cae_component_2.png) | ![CAE Component 3](/output/images/cae_component_3.png) | ![CAE RGB Composite](/output/images/cae_composite.png) |
+|                                                 CAE Channel 1                                                 |                                                 CAE Channel 2                                                 |                                                 CAE Channel 3                                                 |                                               CAE RGB Composite                                               |
+| :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+| ![CAE Component 1](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/cae_component_1.png) | ![CAE Component 2](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/cae_component_2.png) | ![CAE Component 3](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/cae_component_3.png) | ![CAE RGB Composite](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/cae_composite.png) |
 
 ##### Training Optimization
 
-![CAE Training Loss](/output/images/cae_training_loss.png)
+![CAE Training Loss](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/cae_training_loss.png)
 
 ---
 
@@ -345,10 +345,10 @@ To demonstrate that non-linear feature extraction resolves metamerism, identifyi
 
 ```bash
 # Ink clustering inside the PCA 3D subspace
-hsi-analysis detect-inks --hdr data/sample.hdr --raw data/sample.raw --method pca -o output/images
+hsi-analysis detect-inks --method pca --hdr data/sample.hdr --raw data/sample.raw -o output/images
 
 # Ink clustering inside the CAE 3D latent space
-hsi-analysis detect-inks --hdr data/sample.hdr --raw data/sample.raw --method cae -o output/images
+hsi-analysis detect-inks --method cae --hdr data/sample.hdr --raw data/sample.raw -o output/images
 ```
 
 #### Under the Hood:
@@ -387,15 +387,15 @@ Optimal Number of Ink Clusters Detected: 6 (Silhouette = 0.6246)
 
 ##### PCA Subspace Classification Maps
 
-|                   PCA K=2 (Optimal)                   |                        PCA K=3                        |                        PCA K=5                        |
-| :---------------------------------------------------: | :---------------------------------------------------: | :---------------------------------------------------: |
-| ![PCA K=2](/output/images/classified_inks_pca_k2.png) | ![PCA K=3](/output/images/classified_inks_pca_k3.png) | ![PCA K=5](/output/images/classified_inks_pca_k5.png) |
+|                                              PCA K=2 (Optimal)                                               |                                                   PCA K=3                                                    |                                                   PCA K=5                                                    |
+| :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
+| ![PCA K=2](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_pca_k2.png) | ![PCA K=3](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_pca_k3.png) | ![PCA K=5](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_pca_k5.png) |
 
 ##### CAE Latent Space Classification Maps
 
-|                        CAE K=3                        |                        CAE K=5                        |                   CAE K=6 (Optimal)                   |
-| :---------------------------------------------------: | :---------------------------------------------------: | :---------------------------------------------------: |
-| ![CAE K=3](/output/images/classified_inks_cae_k3.png) | ![CAE K=5](/output/images/classified_inks_cae_k5.png) | ![CAE K=6](/output/images/classified_inks_cae_k6.png) |
+|                                                   CAE K=3                                                    |                                                   CAE K=5                                                    |                                              CAE K=6 (Optimal)                                               |
+| :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------: |
+| ![CAE K=3](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_cae_k3.png) | ![CAE K=5](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_cae_k5.png) | ![CAE K=6](/Pattern-Recognition-708508/Course-Project/hsi-analysis/output/images/classified_inks_cae_k6.png) |
 
 ---
 
