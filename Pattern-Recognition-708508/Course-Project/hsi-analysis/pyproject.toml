@@ -15,7 +15,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+    "numpy",
+    "pillow",
+]
 
 [project.scripts]
 hsi-analysis = "hsi_analysis.cli:main"
