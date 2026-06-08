@@ -17,5 +17,8 @@
 - [x] Document the work in `docs/walkthroughs/plot-spectra.md`
 - [x] Implement `detect-inks` command (`detect_inks.py`)
 - [x] Document ink detection pattern recognition in `docs/walkthroughs/detect-inks.md`
-- [x] Use color-labeling to classify text written with different inks in the document
-- [x] Document the work and discuss the strengths, weaknesses, and limitations of the ink detection approach
+- [x] Implement color-labeling classified inks
+- [x] Implement PCA dimensionality reduction subcommand (`reduce_dimensions.py`)
+- [x] Register `reduce-dimensions` command in `cli.py`
+- [x] Add automated tests for PCA dimensionality reduction
+- [x] Run verification on the sample dataset and document findings

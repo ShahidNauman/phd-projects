@@ -68,6 +68,34 @@ wavelength = {
     #     self.assertEqual(expected, 4000)
     #     self.assertEqual(actual, 3000)
 
+    def test_reduce_dimensions(self):
+        from hsi_analysis.reduce_dimensions import reduce_dimensions
+
+        class Args:
+            def __init__(self, hdr, raw, output, components=3):
+                self.hdr = hdr
+                self.raw = raw
+                self.output = output
+                self.components = components
+
+        with tempfile.TemporaryDirectory() as temp_out:
+            args = Args(self.hdr_path, self.raw_path, temp_out, components=3)
+            reduce_dimensions(args)
+
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "pca_component_1.png"))
+            )
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "pca_component_2.png"))
+            )
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "pca_component_3.png"))
+            )
+            self.assertTrue(os.path.exists(os.path.join(temp_out, "pca_composite.png")))
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "pca_variance_plot.png"))
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,6 +5,7 @@ from hsi_analysis.cube_info import print_cube_info
 from hsi_analysis.image_generator import generate_images
 from hsi_analysis.plot_spectra import plot_spectra
 from hsi_analysis.detect_inks import detect_inks
+from hsi_analysis.reduce_dimensions import reduce_dimensions
 
 
 def main():
@@ -85,6 +86,31 @@ def main():
         help="Directory to save the generated visualization (default: output/images)",
     )
 
+    # reduce-dimensions command
+    reduce_parser = subparsers.add_parser(
+        "reduce-dimensions", help="Perform PCA dimensionality reduction on the HSI cube"
+    )
+    reduce_parser.add_argument(
+        "--hdr", required=True, help="Path to the ENVI header file (.hdr)"
+    )
+    reduce_parser.add_argument(
+        "--raw", required=True, help="Path to the raw binary spectral cube file (.raw)"
+    )
+    reduce_parser.add_argument(
+        "--output",
+        "--out",
+        "-o",
+        default="output/images",
+        help="Directory to save the PCA outputs (default: output/images)",
+    )
+    reduce_parser.add_argument(
+        "--components",
+        "-c",
+        type=int,
+        default=3,
+        help="Number of principal components to save as images (default: 3)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "cube-info":
@@ -95,6 +121,8 @@ def main():
         plot_spectra(args)
     elif args.command == "detect-inks":
         detect_inks(args)
+    elif args.command == "reduce-dimensions":
+        reduce_dimensions(args)
     else:
         parser.print_help()
         sys.exit(1)
