@@ -110,6 +110,12 @@ def main():
         default=3,
         help="Number of principal components to save as images (default: 3)",
     )
+    reduce_parser.add_argument(
+        "--using",
+        choices=["pca", "cae"],
+        default="pca",
+        help="Method to use for dimensionality reduction (pca or cae, default: pca)",
+    )
 
     args = parser.parse_args()
 

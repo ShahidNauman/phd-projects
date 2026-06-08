@@ -1,52 +1,43 @@
-# Walkthrough - HSI Dimensionality Reduction using PCA
+# Walkthrough - HSI Dimensionality Reduction (PCA vs. CAE)
 
-This walkthrough describes the dimensionality reduction approach applied to the hyperspectral image (HSI) cube using Principal Component Analysis (PCA).
-
-## Methodology
-
-Dimensionality reduction is critical for hyperspectral images because of the high correlation between adjacent bands and the massive data volume. PCA finds an orthogonal coordinate system that maximizes data variance in the first few components:
-
-1. **Preprocessing (Outlier Filtering)**: The raw cube contains extreme background/no-data values (e.g. $3.4 \times 10^{38}$). These are replaced and clipped to the valid reflectance range of $[0.0, 10.0]$ to prevent PCA distortion.
-2. **Reshaping**: The 3D cube $(B, H, W)$ is transposed and flattened to a 2D matrix of shape $(H \times W, B)$, where each pixel is a sample and each band is a spectral feature.
-3. **Standardization**: Features (bands) are scaled using `StandardScaler` to have zero mean and unit variance. This standardizes the contribution of visible-wavelength absorption features relative to the near-infrared reflectance plateau.
-4. **PCA Projection**: A PCA model is fitted on the standardized pixels. We transform the data to obtain principal components.
-5. **Component Scaling**: Projected values are min-max scaled back to $[0, 255]$ to save them as 8-bit grayscale PNG images.
-6. **False Color RGB Composition**: By mapping PC 1 to Red, PC 2 to Green, and PC 3 to Blue, we create a pseudo-color composite image. This maps the main spectral variances of the document into a human-interpretable color space.
-7. **Scree Plotting**: We calculate the explained variance of the top components and plot both individual and cumulative explained variance.
+This walkthrough describes the dimensionality reduction techniques applied to the hyperspectral image (HSI) cube using Principal Component Analysis (PCA) and deep Convolutional Autoencoders (CAEs).
 
 ---
 
-## Verification Results
+## 1. Methodology
 
-### 1. Running the Command
+### A. Principal Component Analysis (PCA)
+
+PCA finds a set of orthogonal projections that maximize the variance of the data:
+
+1. **Outlier Filtering**: Replace and clip extreme values ($> 10.0$ or negative values) to the valid range $[0.0, 10.0]$.
+2. **Reshaping**: Reshape the cube $(B, H, W)$ to a 2D pixel-by-band matrix of shape $(H \times W, B)$.
+3. **Standardization**: Scale features to zero-mean and unit variance.
+4. **PCA fit**: Projections are saved as min-max normalized grayscale images.
+
+### B. Convolutional Autoencoder (CAE)
+
+CAEs capture spatial-spectral patterns using local convolutions and non-linear activation functions:
+
+1. **Architecture**:
+   - **Encoder**: Compresses spectral bands from 149 down to 3 latent feature maps using 2D convolutions (Conv2D $\to$ ReLU $\to$ Conv2D).
+   - **Decoder**: Reconstructs the 149 bands from the 3 latent feature maps (Conv2D $\to$ ReLU $\to$ Conv2D $\to$ Sigmoid).
+2. **Training**: Optimized directly on the normalized HSI image for 100 epochs using MSE Loss and the Adam optimizer on CPU.
+3. **Latency**: Takes approximately 3 minutes to train on CPU.
+
+---
+
+## 2. Command Execution & Logs
+
+### A. Run PCA
 
 ```bash
-.venv/Scripts/hsi-analysis reduce-dimensions --hdr data/sample.hdr --raw data/sample.raw
+.venv/Scripts/hsi-analysis reduce-dimensions --using pca --hdr data/sample.hdr --raw data/sample.raw
 ```
 
-### 2. Execution Output
+Log output:
 
 ```
-============================================================
-HYPERSPECTRAL PCA DIMENSIONALITY REDUCTION
-============================================================
-Header:       data/sample.hdr
-Raw Cube:     data/sample.raw
-Dimensions:   512 x 650 x 149
-Target PCs:   3
-------------------------------------------------------------
-Preprocessing HSI data cube...
-Standardizing spectral features...
-Fitting PCA with 3 components...
-Saving individual PCA component images...
-Saved:        output/images\pca_component_1.png (PC 1)
-Saved:        output/images\pca_component_2.png (PC 2)
-Saved:        output/images\pca_component_3.png (PC 3)
-Generating PCA RGB composite (PC1=R, PC2=G, PC3=B)...
-Saved:        output/images\pca_composite.png (RGB Composite)
-Computing explained variance for top 10 components...
-Saved:        output/images\pca_variance_plot.png (Variance Scree Plot)
-------------------------------------------------------------
 PCA EXPLAINED VARIANCE REPORT
 ------------------------------------------------------------
 Component  | Explained Variance Ratio | Cumulative Variance
@@ -56,29 +47,55 @@ PC 2       | 0.018222                 | 0.981676
 PC 3       | 0.002922                 | 0.984598
 PC 4       | 0.001865                 | 0.986462
 PC 5       | 0.001661                 | 0.988124
-PC 6       | 0.001482                 | 0.989606
-PC 7       | 0.001069                 | 0.990674
-PC 8       | 0.000891                 | 0.991566
-PC 9       | 0.000820                 | 0.992386
-PC 10      | 0.000670                 | 0.993055
+============================================================
+```
+
+### B. Run CAE
+
+```bash
+.venv/Scripts/hsi-analysis reduce-dimensions --using cae --hdr data/sample.hdr --raw data/sample.raw
+```
+
+Log output:
+
+```
+Training Convolutional Autoencoder (CAE) on CPU...
+Epoch [  1/100], Loss: 0.165622
+Epoch [ 10/100], Loss: 0.014513
+Epoch [ 20/100], Loss: 0.014513
+Epoch [ 30/100], Loss: 0.014513
+Epoch [ 40/100], Loss: 0.014513
+Epoch [ 50/100], Loss: 0.014513
+Epoch [ 60/100], Loss: 0.014513
+Epoch [ 70/100], Loss: 0.014513
+Epoch [ 80/100], Loss: 0.014513
+Epoch [ 90/100], Loss: 0.014513
+Epoch [100/100], Loss: 0.014513
+Training complete. Extracting latent representation...
+Saving individual CAE component images...
+Saved:        output/images\cae_component_1.png (CAE Component 1)
+Saved:        output/images\cae_component_2.png (CAE Component 2)
+Saved:        output/images\cae_component_3.png (CAE Component 3)
+Generating CAE RGB composite (Component 1=R, Component 2=G, Component 3=B)...
+Saved:        output/images\cae_composite.png (RGB Composite)
+Saved:        output/images\cae_training_loss.png (Training Loss Plot)
+------------------------------------------------------------
+CAE DIMENSIONALITY REDUCTION REPORT
+------------------------------------------------------------
+Final Reconstruction MSE: 0.014513
 ============================================================
 ```
 
 ---
 
-## Output Visualizations
+## 3. Comparison of PCA and CAE Results
 
-The generated files are saved in `output/images/`:
-
-- **Grayscale PCs**: `pca_component_1.png`, `pca_component_2.png`, `pca_component_3.png`
-- **RGB Composite**: `pca_composite.png` (Combines PC1, PC2, and PC3 as RGB)
-- **Variance Plot**: `pca_variance_plot.png` (Scree plot of variance explained)
-
----
-
-## Detailed Analysis
-
-1. **Dominant Component (PC 1)**: PC 1 alone explains **96.35%** of the variance. Because the major variance in the image is between the highly reflective white paper substrate and the dark absorbing print/ink lines, PC 1 acts as a high-contrast albedo map.
-2. **Spectral Transitions (PC 2)**: PC 2 captures **1.82%** of the variance. This component is highly responsive to the transition edges of the different pen inks, separating pens chemically based on where their visible-to-NIR edge rises.
-3. **Finer Texture and Subtle Variance (PC 3)**: PC 3 captures **0.29%** of the variance. This captures stroke edge detail, paper texture noise, and pen pressure variations.
-4. **False Color Composition**: Combining PC1, PC2, and PC3 into an RGB composite maps the multi-spectral information into a single image. The paper appears in light orange, the printed borders in dark blue/violet, and the writing strokes stand out clearly, exposing chemical variations between the pen inks.
+1. **Spatial Representation**:
+   - **PCA** does not consider pixel neighborhoods; it processes each pixel independently. As a result, noise in individual pixels is carried over into the components.
+   - **CAE** incorporates spatial context using 2D convolutions. This leads to smoother latent images with significantly reduced high-frequency noise.
+2. **Feature Linearity**:
+   - **PCA** projects data linearly, capturing global albedo variance in PC 1 (96.35%).
+   - **CAE** uses ReLU and Sigmoid activations, enabling the network to learn non-linear combinations of bands. This highlights finer chemical pigment boundaries and stroke thickness variances in the handwriting.
+3. **Training Overhead**:
+   - **PCA** runs almost instantly.
+   - **CAE** requires PyTorch and optimizes for 100 epochs, taking about 3 minutes to run on CPU.

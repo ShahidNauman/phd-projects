@@ -22,3 +22,9 @@
 - [x] Register `reduce-dimensions` command in `cli.py`
 - [x] Add automated tests for PCA dimensionality reduction
 - [x] Run verification on the sample dataset and document findings
+- [x] Add PyTorch dependency to `pyproject.toml`
+- [x] Install PyTorch in the virtual environment
+- [x] Add `--using` argument to `reduce-dimensions` subcommand in `cli.py`
+- [x] Implement Convolutional Autoencoder logic in `reduce_dimensions.py`
+- [x] Add unit and integration tests for CAE dimensionality reduction
+- [x] Run verification for CAE dimensionality reduction and document findings

@@ -218,3 +218,13 @@ output/images/*
 !output/images/classified_inks_k2.png
 !output/images/classified_inks_k3.png
 !output/images/classified_inks_k5.png
+!output/images/pca_component_1.png
+!output/images/pca_component_2.png
+!output/images/pca_component_3.png
+!output/images/pca_composite.png
+!output/images/pca_variance_plot.png
+!output/images/cae_component_1.png
+!output/images/cae_component_2.png
+!output/images/cae_component_3.png
+!output/images/cae_composite.png
+!output/images/cae_training_loss.png

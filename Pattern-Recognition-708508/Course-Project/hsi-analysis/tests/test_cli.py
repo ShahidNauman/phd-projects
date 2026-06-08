@@ -72,14 +72,17 @@ wavelength = {
         from hsi_analysis.reduce_dimensions import reduce_dimensions
 
         class Args:
-            def __init__(self, hdr, raw, output, components=3):
+            def __init__(self, hdr, raw, output, components=3, using="pca"):
                 self.hdr = hdr
                 self.raw = raw
                 self.output = output
                 self.components = components
+                self.using = using
 
         with tempfile.TemporaryDirectory() as temp_out:
-            args = Args(self.hdr_path, self.raw_path, temp_out, components=3)
+            args = Args(
+                self.hdr_path, self.raw_path, temp_out, components=3, using="pca"
+            )
             reduce_dimensions(args)
 
             self.assertTrue(
@@ -94,6 +97,43 @@ wavelength = {
             self.assertTrue(os.path.exists(os.path.join(temp_out, "pca_composite.png")))
             self.assertTrue(
                 os.path.exists(os.path.join(temp_out, "pca_variance_plot.png"))
+            )
+
+    def test_reduce_dimensions_cae(self):
+        try:
+            import torch
+        except ImportError:
+            # Skip test if torch is not installed yet
+            return
+
+        from hsi_analysis.reduce_dimensions import reduce_dimensions
+
+        class Args:
+            def __init__(self, hdr, raw, output, components=3, using="cae"):
+                self.hdr = hdr
+                self.raw = raw
+                self.output = output
+                self.components = components
+                self.using = using
+
+        with tempfile.TemporaryDirectory() as temp_out:
+            args = Args(
+                self.hdr_path, self.raw_path, temp_out, components=3, using="cae"
+            )
+            reduce_dimensions(args)
+
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "cae_component_1.png"))
+            )
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "cae_component_2.png"))
+            )
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "cae_component_3.png"))
+            )
+            self.assertTrue(os.path.exists(os.path.join(temp_out, "cae_composite.png")))
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "cae_training_loss.png"))
             )
 
 
