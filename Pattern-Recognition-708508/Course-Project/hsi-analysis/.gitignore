@@ -215,3 +215,6 @@ output/images/*
 !output/images/band_60.png
 !output/images/band_149.png
 !output/images/spectral_reflectance.png
+!output/images/classified_inks_k2.png
+!output/images/classified_inks_k3.png
+!output/images/classified_inks_k5.png

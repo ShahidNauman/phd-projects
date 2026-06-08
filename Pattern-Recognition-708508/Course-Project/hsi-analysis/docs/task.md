@@ -17,3 +17,5 @@
 - [x] Document the work in `docs/walkthroughs/plot-spectra.md`
 - [x] Implement `detect-inks` command (`detect_inks.py`)
 - [x] Document ink detection pattern recognition in `docs/walkthroughs/detect-inks.md`
+- [x] Use color-labeling to classify text written with different inks in the document
+- [x] Document the work and discuss the strengths, weaknesses, and limitations of the ink detection approach

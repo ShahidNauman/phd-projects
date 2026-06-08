@@ -77,6 +77,13 @@ def main():
     detect_parser.add_argument(
         "--raw", required=True, help="Path to the raw binary spectral cube file (.raw)"
     )
+    detect_parser.add_argument(
+        "--output",
+        "--out",
+        "-o",
+        default="output/images",
+        help="Directory to save the generated visualization (default: output/images)",
+    )
 
     args = parser.parse_args()
 

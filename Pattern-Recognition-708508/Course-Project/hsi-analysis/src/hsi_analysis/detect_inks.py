@@ -1,14 +1,63 @@
 import os
 import sys
 import numpy as np
+from PIL import Image
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from hsi_analysis.parser import parse_envi_header
 
 
+def save_classified_image(
+    row_boundaries, col_start, col_end, norm_band, labels, k, output_dir
+):
+    """
+    Creates an RGB image from the grayscale Band 30, then colors the segmented
+    handwriting text pixels based on their cluster labels.
+    """
+    # Base grayscale image from Band 30 (norm_band) normalized to 0-255
+    gray_img = (norm_band * 255.0).astype(np.uint8)
+
+    # Create RGB representation
+    rgb_img = np.stack([gray_img, gray_img, gray_img], axis=-1)
+
+    # Distinct color palette (R, G, B) for clusters
+    colors = [
+        [220, 20, 60],  # Red/Crimson
+        [34, 139, 34],  # Forest Green
+        [30, 144, 255],  # Dodger Blue
+        [255, 140, 0],  # Dark Orange
+        [147, 112, 219],  # Medium Purple
+        [0, 139, 139],  # Dark Cyan
+    ]
+
+    # Color the handwriting pixels
+    for i in range(12):
+        y_start = row_boundaries[i] + 5
+        y_end = row_boundaries[i + 1] - 5
+
+        cell_norm = norm_band[y_start:y_end, col_start:col_end]
+        thresh = np.percentile(cell_norm, 12)
+        local_y, local_x = np.where(cell_norm <= thresh)
+
+        global_y = local_y + y_start
+        global_x = local_x + col_start
+
+        cluster_id = labels[i]
+        color = colors[cluster_id % len(colors)]
+
+        rgb_img[global_y, global_x] = color
+
+    img = Image.fromarray(rgb_img)
+    filename = f"classified_inks_k{k}.png"
+    filepath = os.path.join(output_dir, filename)
+    img.save(filepath)
+    print(f"Saved color-labeled visualization to: {filepath}")
+
+
 def detect_inks(args):
     hdr_path = args.hdr
     raw_path = args.raw
+    output_dir = args.output
 
     if not os.path.exists(hdr_path):
         print(f"Error: Header file not found at '{hdr_path}'", file=sys.stderr)
@@ -17,6 +66,8 @@ def detect_inks(args):
     if not os.path.exists(raw_path):
         print(f"Error: Raw file not found at '{raw_path}'", file=sys.stderr)
         sys.exit(1)
+
+    os.makedirs(output_dir, exist_ok=True)
 
     try:
         metadata = parse_envi_header(hdr_path)
@@ -82,7 +133,6 @@ def detect_inks(args):
     spectra = np.array(spectra)
 
     # Standardize the spectral curves to remove baseline/intensity offsets
-    # This ensures K-means clusters shapes rather than overall ink thickness/intensity
     spectra_norm = (spectra - spectra.mean(axis=1, keepdims=True)) / spectra.std(
         axis=1, keepdims=True
     )
@@ -111,7 +161,7 @@ def detect_inks(args):
     )
     print("-" * 60)
 
-    # Print groupings for detected optimal K, and also for K=3 and K=5 (for detailed comparison)
+    # Print groupings and save color-labeled images for K=2, 3, and 5
     for k in [best_k, 3, 5]:
         score, labels = results_by_k[k]
         print(f"\nGroupings for K = {k} (Silhouette = {score:.4f}):")
@@ -123,5 +173,10 @@ def detect_inks(args):
 
         for c in range(k):
             print(f"  Cluster {c}: {', '.join(clusters[c])}")
+
+        # Save color-labeled visualization image
+        save_classified_image(
+            row_boundaries, col_start, col_end, norm_band, labels, k, output_dir
+        )
 
     print("=" * 60)
