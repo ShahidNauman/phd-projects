@@ -8,7 +8,14 @@ from hsi_analysis.parser import parse_envi_header
 
 
 def save_classified_image(
-    row_boundaries, col_start, col_end, norm_band, labels, k, output_dir
+    row_boundaries,
+    col_start,
+    col_end,
+    norm_band,
+    labels,
+    k,
+    output_dir,
+    method="original",
 ):
     """
     Creates an RGB image from the grayscale Band 30, then colors the segmented
@@ -48,7 +55,10 @@ def save_classified_image(
         rgb_img[global_y, global_x] = color
 
     img = Image.fromarray(rgb_img)
-    filename = f"classified_inks_k{k}.png"
+    if method == "original":
+        filename = f"classified_inks_k{k}.png"
+    else:
+        filename = f"classified_inks_{method}_k{k}.png"
     filepath = os.path.join(output_dir, filename)
     img.save(filepath)
     print(f"Saved color-labeled visualization to: {filepath}")
@@ -58,6 +68,7 @@ def detect_inks(args):
     hdr_path = args.hdr
     raw_path = args.raw
     output_dir = args.output
+    method = getattr(args, "method", "original")
 
     if not os.path.exists(hdr_path):
         print(f"Error: Header file not found at '{hdr_path}'", file=sys.stderr)
@@ -84,7 +95,7 @@ def detect_inks(args):
         sys.exit(1)
 
     print("=" * 60)
-    print("INK DETECTION PATTERN RECOGNITION REPORT")
+    print(f"INK DETECTION PATTERN RECOGNITION USING {method.upper()} FEATURES")
     print("=" * 60)
     print(f"Header:       {hdr_path}")
     print(f"Raw Cube:     {raw_path}")
@@ -99,6 +110,29 @@ def detect_inks(args):
         print(f"Error loading raw data: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Dimensionality reduction projection if method is pca or cae
+    if method == "pca":
+        from hsi_analysis.reduce_dimensions import get_pca_projection
+
+        print("Computing PCA projection (3 components)...")
+        pca_images, _ = get_pca_projection(
+            cube_data, lines, samples, total_bands, n_components=3
+        )
+        feature_cube = pca_images
+        num_features = 3
+    elif method == "cae":
+        from hsi_analysis.reduce_dimensions import get_cae_projection
+
+        print("Computing CAE projection (3 components)...")
+        latent_transposed, _ = get_cae_projection(
+            cube_data, lines, samples, total_bands, n_components=3
+        )
+        feature_cube = latent_transposed
+        num_features = 3
+    else:  # original
+        feature_cube = np.transpose(cube_data, (1, 2, 0))
+        num_features = total_bands
+
     # Segment each of the 12 text cells
     row_boundaries = [44, 100, 148, 199, 247, 295, 339, 386, 435, 485, 533, 575, 620]
     col_start = 55
@@ -108,8 +142,8 @@ def detect_inks(args):
     seg_band = np.clip(cube_data[seg_band_idx], 0.0, 10.0)
     norm_band = (seg_band - seg_band.min()) / (seg_band.max() - seg_band.min())
 
-    spectra = []
-    print("Segmenting handwriting cells and extracting spectral signatures...")
+    signatures = []
+    print("Segmenting handwriting cells and extracting feature signatures...")
     for i in range(12):
         y_start = row_boundaries[i] + 5
         y_end = row_boundaries[i + 1] - 5
@@ -121,21 +155,28 @@ def detect_inks(args):
         global_y = local_y + y_start
         global_x = local_x + col_start
 
-        spec = []
-        for b in range(total_bands):
-            pixel_vals = cube_data[b, global_y, global_x]
-            finite_vals = pixel_vals[
-                np.isfinite(pixel_vals) & (pixel_vals < 1e10) & (pixel_vals > -1e10)
+        # Extract values for segmented pixels inside feature cube
+        # feature_cube shape is (lines, samples, num_features)
+        pixel_vals = feature_cube[
+            global_y, global_x
+        ]  # shape: (len(global_y), num_features)
+
+        sig = []
+        for f in range(num_features):
+            feat_vals = pixel_vals[:, f]
+            # Filter finite values
+            finite_vals = feat_vals[
+                np.isfinite(feat_vals) & (feat_vals < 1e10) & (feat_vals > -1e10)
             ]
-            spec.append(np.mean(finite_vals) if len(finite_vals) > 0 else 0.0)
-        spectra.append(spec)
+            sig.append(np.mean(finite_vals) if len(finite_vals) > 0 else 0.0)
+        signatures.append(sig)
 
-    spectra = np.array(spectra)
+    signatures = np.array(signatures)
 
-    # Standardize the spectral curves to remove baseline/intensity offsets
-    spectra_norm = (spectra - spectra.mean(axis=1, keepdims=True)) / spectra.std(
-        axis=1, keepdims=True
-    )
+    # Standardize the feature curves to remove baseline/intensity offsets
+    stds = signatures.std(axis=1, keepdims=True)
+    stds[stds == 0.0] = 1.0
+    signatures_norm = (signatures - signatures.mean(axis=1, keepdims=True)) / stds
 
     print("-" * 60)
     print("Evaluating K-Means Clustering Silhouette Scores:")
@@ -147,8 +188,11 @@ def detect_inks(args):
 
     for k in range(2, 7):
         kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-        labels = kmeans.fit_predict(spectra_norm)
-        score = silhouette_score(spectra_norm, labels)
+        labels = kmeans.fit_predict(signatures_norm)
+        try:
+            score = silhouette_score(signatures_norm, labels)
+        except ValueError:
+            score = 0.0
         results_by_k[k] = (score, labels)
         print(f"K={k} clusters: Silhouette Score = {score:.4f}")
         if score > best_score:
@@ -176,7 +220,14 @@ def detect_inks(args):
 
         # Save color-labeled visualization image
         save_classified_image(
-            row_boundaries, col_start, col_end, norm_band, labels, k, output_dir
+            row_boundaries,
+            col_start,
+            col_end,
+            norm_band,
+            labels,
+            k,
+            output_dir,
+            method=method,
         )
 
     print("=" * 60)

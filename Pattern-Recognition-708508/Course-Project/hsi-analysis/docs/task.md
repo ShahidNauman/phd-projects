@@ -28,3 +28,8 @@
 - [x] Implement Convolutional Autoencoder logic in `reduce_dimensions.py`
 - [x] Add unit and integration tests for CAE dimensionality reduction
 - [x] Run verification for CAE dimensionality reduction and document findings
+- [x] Add `--method` argument to `detect-inks` subcommand in `cli.py`
+- [x] Refactor `reduce_dimensions.py` to expose helper projection functions
+- [x] Implement pca/cae feature clustering in `detect_inks.py`
+- [x] Add unit and integration tests for detect-inks with `--method pca/cae`
+- [x] Run verification for detect-inks methods, compare results and document findings

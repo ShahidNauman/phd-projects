@@ -85,6 +85,12 @@ def main():
         default="output/images",
         help="Directory to save the generated visualization (default: output/images)",
     )
+    detect_parser.add_argument(
+        "--method",
+        choices=["original", "pca", "cae"],
+        default="original",
+        help="Feature space to use for ink clustering (original, pca, or cae, default: original)",
+    )
 
     # reduce-dimensions command
     reduce_parser = subparsers.add_parser(

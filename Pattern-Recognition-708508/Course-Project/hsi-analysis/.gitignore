@@ -228,3 +228,10 @@ output/images/*
 !output/images/cae_component_3.png
 !output/images/cae_composite.png
 !output/images/cae_training_loss.png
+!output/images/classified_inks_pca_k2.png
+!output/images/classified_inks_pca_k3.png
+!output/images/classified_inks_pca_k5.png
+!output/images/classified_inks_cae_k6.png
+!output/images/classified_inks_cae_k3.png
+!output/images/classified_inks_cae_k5.png
+

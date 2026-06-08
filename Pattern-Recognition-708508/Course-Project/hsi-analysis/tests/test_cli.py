@@ -136,6 +136,87 @@ wavelength = {
                 os.path.exists(os.path.join(temp_out, "cae_training_loss.png"))
             )
 
+    def test_detect_inks_pca(self):
+        from hsi_analysis.detect_inks import detect_inks
+
+        # Create a mock HSI with valid dimensions for segmentation
+        hdr_path = os.path.join(self.temp_dir.name, "detect_sample.hdr")
+        raw_path = os.path.join(self.temp_dir.name, "detect_sample.raw")
+
+        hdr_content = """ENVI
+samples = 512
+lines = 650
+bands = 31
+header offset = 0
+file type = ENVI Standard
+data type = 4
+interleave = bsq
+"""
+        with open(hdr_path, "w", encoding="utf-8") as f:
+            f.write(hdr_content)
+
+        # Write 512 * 650 * 31 * 4 = 41,267,200 bytes
+        with open(raw_path, "wb") as f:
+            f.write(b"\x00" * 41267200)
+
+        class Args:
+            def __init__(self, hdr, raw, output, method="pca"):
+                self.hdr = hdr
+                self.raw = raw
+                self.output = output
+                self.method = method
+
+        with tempfile.TemporaryDirectory() as temp_out:
+            args = Args(hdr_path, raw_path, temp_out, method="pca")
+            detect_inks(args)
+
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "classified_inks_pca_k3.png"))
+            )
+
+    def test_detect_inks_cae(self):
+        try:
+            import torch
+        except ImportError:
+            return
+
+        from hsi_analysis.detect_inks import detect_inks
+
+        # Create a mock HSI with valid dimensions for segmentation
+        hdr_path = os.path.join(self.temp_dir.name, "detect_sample_cae.hdr")
+        raw_path = os.path.join(self.temp_dir.name, "detect_sample_cae.raw")
+
+        hdr_content = """ENVI
+samples = 512
+lines = 650
+bands = 31
+header offset = 0
+file type = ENVI Standard
+data type = 4
+interleave = bsq
+"""
+        with open(hdr_path, "w", encoding="utf-8") as f:
+            f.write(hdr_content)
+
+        # Write 512 * 650 * 31 * 4 = 41,267,200 bytes
+        with open(raw_path, "wb") as f:
+            f.write(b"\x00" * 41267200)
+
+        class Args:
+            def __init__(self, hdr, raw, output, method="cae"):
+                self.hdr = hdr
+                self.raw = raw
+                self.output = output
+                self.method = method
+
+        with tempfile.TemporaryDirectory() as temp_out:
+            args = Args(hdr_path, raw_path, temp_out, method="cae")
+            detect_inks(args)
+
+            self.assertTrue(
+                os.path.exists(os.path.join(temp_out, "classified_inks_cae_k3.png"))
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

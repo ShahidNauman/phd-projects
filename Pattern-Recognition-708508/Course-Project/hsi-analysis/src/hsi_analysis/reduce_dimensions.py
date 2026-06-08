@@ -11,8 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from hsi_analysis.parser import parse_envi_header
 
 
-def run_pca_reduction(cube_data, lines, samples, total_bands, n_components, output_dir):
-    print("Preprocessing HSI data cube for PCA...")
+def get_pca_projection(cube_data, lines, samples, total_bands, n_components):
     # Reshape from (total_bands, lines, samples) to (lines * samples, total_bands)
     cube_transposed = np.transpose(cube_data, (1, 2, 0))
     pixel_matrix = cube_transposed.reshape((-1, total_bands))
@@ -22,15 +21,108 @@ def run_pca_reduction(cube_data, lines, samples, total_bands, n_components, outp
     pixel_matrix_clean = np.clip(pixel_matrix_clean, 0.0, 10.0)
 
     # Standardize data to have zero mean and unit variance per band
-    print("Standardizing spectral features...")
     scaler = StandardScaler()
     pixel_matrix_scaled = scaler.fit_transform(pixel_matrix_clean)
 
     # Perform PCA for output components
-    print(f"Fitting PCA with {n_components} components...")
     pca = PCA(n_components=n_components)
     pca_result = pca.fit_transform(pixel_matrix_scaled)
     pca_images = pca_result.reshape((lines, samples, n_components))
+
+    return pca_images, pixel_matrix_scaled
+
+
+def get_cae_projection(cube_data, lines, samples, total_bands, n_components):
+    try:
+        import torch
+        import torch.nn as nn
+        import torch.optim as optim
+    except ImportError:
+        print(
+            "Error: PyTorch is required for Convolutional Autoencoder (CAE) reduction.",
+            file=sys.stderr,
+        )
+        print("Please verify your installation.", file=sys.stderr)
+        sys.exit(1)
+
+    print("Preprocessing HSI data cube for CAE...")
+    # Clean and clip values to valid reflectance range [0.0, 10.0]
+    cube_clean = np.nan_to_num(cube_data, nan=0.0, posinf=10.0, neginf=0.0)
+    cube_clean = np.clip(cube_clean, 0.0, 10.0)
+
+    # Min-Max normalize the cube to [0.0, 1.0] range
+    cube_min = cube_clean.min()
+    cube_max = cube_clean.max()
+    if cube_max > cube_min:
+        cube_normalized = (cube_clean - cube_min) / (cube_max - cube_min)
+    else:
+        cube_normalized = np.zeros_like(cube_clean)
+
+    # Convert to PyTorch tensor of shape (1, total_bands, lines, samples)
+    x_train = torch.from_numpy(cube_normalized).float().unsqueeze(0)
+
+    class HSI_ConvolutionalAutoencoder(nn.Module):
+        def __init__(self, in_channels, latent_channels):
+            super(HSI_ConvolutionalAutoencoder, self).__init__()
+            # Encoder
+            self.encoder = nn.Sequential(
+                nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+                nn.ReLU(True),
+                nn.Conv2d(32, latent_channels, kernel_size=3, padding=1),
+            )
+            # Decoder
+            self.decoder = nn.Sequential(
+                nn.Conv2d(latent_channels, 32, kernel_size=3, padding=1),
+                nn.ReLU(True),
+                nn.Conv2d(32, in_channels, kernel_size=3, padding=1),
+                nn.Sigmoid(),
+            )
+
+        def forward(self, x):
+            latent = self.encoder(x)
+            reconstructed = self.decoder(latent)
+            return latent, reconstructed
+
+    # Device selection (always CPU)
+    device = torch.device("cpu")
+    model = HSI_ConvolutionalAutoencoder(total_bands, n_components).to(device)
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+    x_train = x_train.to(device)
+
+    print("Training Convolutional Autoencoder (CAE) on CPU...")
+    epochs = 100
+    losses = []
+
+    model.train()
+    for epoch in range(1, epochs + 1):
+        optimizer.zero_grad()
+        latent, reconstructed = model(x_train)
+        loss = criterion(reconstructed, x_train)
+        loss.backward()
+        optimizer.step()
+
+        losses.append(loss.item())
+        if epoch == 1 or epoch % 10 == 0:
+            print(f"Epoch [{epoch:>3}/{epochs}], Loss: {loss.item():.6f}")
+
+    print("Training complete. Extracting latent representation...")
+    model.eval()
+    with torch.no_grad():
+        latent, reconstructed = model(x_train)
+        latent_np = latent.squeeze(0).cpu().numpy()
+
+    # Shape: (lines, samples, n_components)
+    latent_transposed = np.transpose(latent_np, (1, 2, 0))
+    return latent_transposed, losses
+
+
+def run_pca_reduction(cube_data, lines, samples, total_bands, n_components, output_dir):
+    print("Preprocessing HSI data cube for PCA...")
+    pca_images, pixel_matrix_scaled = get_pca_projection(
+        cube_data, lines, samples, total_bands, n_components
+    )
 
     # Save components as grayscale images
     print("Saving individual PCA component images...")
@@ -139,85 +231,10 @@ def run_pca_reduction(cube_data, lines, samples, total_bands, n_components, outp
 
 
 def run_cae_reduction(cube_data, lines, samples, total_bands, n_components, output_dir):
-    try:
-        import torch
-        import torch.nn as nn
-        import torch.optim as optim
-    except ImportError:
-        print(
-            "Error: PyTorch is required for Convolutional Autoencoder (CAE) reduction.",
-            file=sys.stderr,
-        )
-        print("Please verify your installation.", file=sys.stderr)
-        sys.exit(1)
-
-    print("Preprocessing HSI data cube for CAE...")
-    # Clean and clip values to valid reflectance range [0.0, 10.0]
-    cube_clean = np.nan_to_num(cube_data, nan=0.0, posinf=10.0, neginf=0.0)
-    cube_clean = np.clip(cube_clean, 0.0, 10.0)
-
-    # Min-Max normalize the cube to [0.0, 1.0] range
-    cube_min = cube_clean.min()
-    cube_max = cube_clean.max()
-    if cube_max > cube_min:
-        cube_normalized = (cube_clean - cube_min) / (cube_max - cube_min)
-    else:
-        cube_normalized = np.zeros_like(cube_clean)
-
-    # Convert to PyTorch tensor of shape (1, total_bands, lines, samples)
-    x_train = torch.from_numpy(cube_normalized).float().unsqueeze(0)
-
-    class HSI_ConvolutionalAutoencoder(nn.Module):
-        def __init__(self, in_channels, latent_channels):
-            super(HSI_ConvolutionalAutoencoder, self).__init__()
-            # Encoder
-            self.encoder = nn.Sequential(
-                nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
-                nn.ReLU(True),
-                nn.Conv2d(32, latent_channels, kernel_size=3, padding=1),
-            )
-            # Decoder
-            self.decoder = nn.Sequential(
-                nn.Conv2d(latent_channels, 32, kernel_size=3, padding=1),
-                nn.ReLU(True),
-                nn.Conv2d(32, in_channels, kernel_size=3, padding=1),
-                nn.Sigmoid(),
-            )
-
-        def forward(self, x):
-            latent = self.encoder(x)
-            reconstructed = self.decoder(latent)
-            return latent, reconstructed
-
-    # Device selection (always CPU as batch size is 1 and it takes <10s)
-    device = torch.device("cpu")
-    model = HSI_ConvolutionalAutoencoder(total_bands, n_components).to(device)
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
-
-    x_train = x_train.to(device)
-
-    print("Training Convolutional Autoencoder (CAE) on CPU...")
-    epochs = 100
-    losses = []
-
-    model.train()
-    for epoch in range(1, epochs + 1):
-        optimizer.zero_grad()
-        latent, reconstructed = model(x_train)
-        loss = criterion(reconstructed, x_train)
-        loss.backward()
-        optimizer.step()
-
-        losses.append(loss.item())
-        if epoch == 1 or epoch % 10 == 0:
-            print(f"Epoch [{epoch:>3}/{epochs}], Loss: {loss.item():.6f}")
-
-    print("Training complete. Extracting latent representation...")
-    model.eval()
-    with torch.no_grad():
-        latent, reconstructed = model(x_train)
-        latent_np = latent.squeeze(0).cpu().numpy()
+    latent_transposed, losses = get_cae_projection(
+        cube_data, lines, samples, total_bands, n_components
+    )
+    latent_np = np.transpose(latent_transposed, (2, 0, 1))
 
     # Save latent component images
     print("Saving individual CAE component images...")
@@ -259,6 +276,7 @@ def run_cae_reduction(cube_data, lines, samples, total_bands, n_components, outp
         print(f"Saved:        {composite_path} (RGB Composite)")
 
     # Plot training loss curve
+    epochs = len(losses)
     plt.figure(figsize=(10, 6))
     plt.plot(range(1, epochs + 1), losses, color="#2ca02c", linewidth=2)
     plt.xlabel("Epoch", fontsize=12, labelpad=10)
