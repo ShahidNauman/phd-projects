@@ -407,6 +407,34 @@ Optimal Number of Ink Clusters Detected: 6 (Silhouette = 0.6246)
 | **PCA Subspace**            |        3         |          2           |      **0.5400**      | **Fails**. Linear projection explains albedo (brightness) in PC 1 (96.35% variance), discarding subtle chemical shape transitions. Splits lines from the _same pen_ into separate clusters.     |
 | **CAE Latent Space**        |        3         |        **6**         |      **0.6246**      | **Resolves Metamerism!** Non-linear mapping maps the complex pigments. 2D convolutions incorporate spatial context to act as a noise filter, allowing K-Means to correctly identify all 6 pens. |
 
+## Eigenvalue & Dimensionality Reduction Analysis (PCA vs. CAE)
+
+In this project, we perform dimensionality reduction on the 149-band HSI cube before clustering. The choice between Principal Component Analysis (PCA) and Convolutional Autoencoders (CAE) highlights a fundamental difference in how features are represented:
+
+### 1. Principal Component Analysis (PCA)
+
+PCA computes the eigenvalues and eigenvectors of the standardized covariance matrix:
+
+- **Eigenvectors** define the new orthogonal projection axes (Principal Components).
+- **Eigenvalues** quantify the variance (information) captured along each axis.
+
+In our dataset, the explained variance is heavily skewed:
+
+- **PC 1** (largest eigenvalue) captures **96.35%** of the variance.
+- **PC 2** captures **2.33%**.
+- **PC 3** captures **0.76%**.
+
+While the top 3 PCs capture **99.44%** of the total linear variance (allowing us to discard the remaining 146 bands), PCA **fails to resolve ink metamerism** (it merges Red and Purple inks into a single cluster). This is because the dominant eigenvalues correspond to global albedo (brightness), whereas the subtle chemical differences are linear noise with small eigenvalues, which get discarded.
+
+### 2. Convolutional Autoencoders (CAE)
+
+CAE bypasses linear eigenvalue constraints:
+
+- It uses **non-linear activations** (e.g., ReLU, Sigmoid) to map complex chemical boundaries.
+- It incorporates **2D spatial context** via convolutions, filtering out pixel-level noise.
+
+By training the network to reconstruct the full 149-band HSI cube, the 3-channel bottleneck is forced to encode only the most representative pigment features. This non-linear mapping successfully resolves metamerism, allowing K-Means to identify all **6 distinct inks** (compared to only 2 detected via PCA).
+
 ---
 
 ## 6. Automated Testing
