@@ -4,6 +4,13 @@ Implementation of the methodology from _LLM-as-a-judge for sarcasm detection usi
 
 The project builds a binary sarcasm judge from review/headline datasets, creates grouped train/validation/test splits, fine-tunes a Hugging Face sequence-classification model, and reports paper-style metrics.
 
+## Documentation
+
+For detailed analysis and overview of the project, please refer to:
+
+- **[Project Report](docs/project_report.md)**: Details the methodology, experimental setup, model architecture, training configuration, evaluation results, and analysis.
+- **[Project Summary](docs/project_summary.md)**: A high-level summary of findings, key results, and conclusion.
+
 ## Quick Start
 
 Create and activate the virtual environment: _(Optional)_

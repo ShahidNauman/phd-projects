@@ -174,14 +174,14 @@ sarcasm-detection/
 
 ### `config.py`
 
-- **File Reference:** [config.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/config.py>)
+- **File Reference:** [config.py](src/sarcasm_judge/config.py)
 - **Purpose:** Provides helper utility to parse YAML config files securely.
 - **Key functions:**
   - `load_config(path: Path) -> dict`: Reads the configuration path, executes `yaml.safe_load`, and verifies that the configuration structure compiles into a dictionary.
 
 ### `templates.py`
 
-- **File Reference:** [templates.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/templates.py>)
+- **File Reference:** [templates.py](src/sarcasm_judge/templates.py)
 - **Purpose:** Handles the prompt template mapping to contextualize sequence inputs.
 - **Key variables and functions:**
   - `DEFAULT_PROMPT_TEMPLATE`: Default text placeholder (`"{text}"`).
@@ -189,7 +189,7 @@ sarcasm-detection/
 
 ### `splits.py`
 
-- **File Reference:** [splits.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/splits.py>)
+- **File Reference:** [splits.py](src/sarcasm_judge/splits.py)
 - **Purpose:** Partitioning dataset records into train (70%), validation (15%), and test (15%) splits while preserving group allocations.
 - **Key logic:**
   - Evaluates the number of unique values in the `group_column`. If there are less than 3 groups, it falls back to standard stratified splits using `train_test_split` (since grouping would be invalid).
@@ -198,7 +198,7 @@ sarcasm-detection/
 
 ### `data.py`
 
-- **File Reference:** [data.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/data.py>)
+- **File Reference:** [data.py](src/sarcasm_judge/data.py)
 - **Purpose:** Raw data extraction, normalization, and partition writing.
 - **Key components:**
   - `LABEL_MAP`: Maps text labels like `"ironic"`, `"sarcastic"`, `"regular"`, `"false"` to integers `0` or `1`.
@@ -211,14 +211,14 @@ sarcasm-detection/
 
 ### `modeling.py`
 
-- **File Reference:** [modeling.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/modeling.py>)
+- **File Reference:** [modeling.py](src/sarcasm_judge/modeling.py)
 - **Purpose:** Model instantiation interface.
 - **Key functions:**
   - `load_tokenizer_and_model`: Pulls tokenizers and classification models from Hugging Face Hub (or local output paths). Automatically assigns index maps (`id2label` and `label2id`) to ensure labels resolve to `"non_sarcastic"` or `"sarcastic"`. It forces `use_fast=True` to speed up tokenization.
 
 ### `metrics.py`
 
-- **File Reference:** [metrics.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/metrics.py>)
+- **File Reference:** [metrics.py](src/sarcasm_judge/metrics.py)
 - **Purpose:** Math evaluation using `scikit-learn` metrics.
 - **Key functions:**
   - `compute_classification_metrics(labels, predictions)`: Computes Accuracy, F1-Score, Precision, Recall (both weighted/macro and per-class targets), along with the final confusion matrix representation.
@@ -226,14 +226,14 @@ sarcasm-detection/
 
 ### `inference.py`
 
-- **File Reference:** [inference.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/inference.py>)
+- **File Reference:** [inference.py](src/sarcasm_judge/inference.py)
 - **Purpose:** Prediction logic on arbitrary input text strings.
 - **Key functions:**
   - `predict_texts(model_path, texts, threshold, max_length, prompt_template)`: Formats and tokenizes custom inputs. Passes inputs through the fine-tuned model on an available GPU/CPU. Extracts raw logits, applies a Softmax activation, and outputs the probability of class `1` (sarcastic). If the probability is equal to or greater than the configurable `threshold` (default `0.5`), it labels the prediction as `"sarcastic"`.
 
 ### `train.py`
 
-- **File Reference:** [train.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/train.py>)
+- **File Reference:** [train.py](src/sarcasm_judge/train.py)
 - **Purpose:** Supervised fine-tuning pipeline orchestration.
 - **Key components:**
   - Integrates Dataset loading using pandas JSONL loaders.
@@ -246,7 +246,7 @@ sarcasm-detection/
 
 ### `cli.py`
 
-- **File Reference:** [cli.py](<file:///e:/Institute%20of%20Space%20Technology%20(IST)/phd-projects/Advanced-Generative-Computing-Systems-827142/Course-Project/sarcasm-detection/src/sarcasm_judge/cli.py>)
+- **File Reference:** [cli.py](src/sarcasm_judge/cli.py)
 - **Purpose:** Main entrypoint. It wraps all submodules inside an `argparse` structure, exposing subcommands like `prepare-csv`, `prepare-amazon`, `prepare-hf`, `train`, `evaluate`, and `predict`.
 
 ---
