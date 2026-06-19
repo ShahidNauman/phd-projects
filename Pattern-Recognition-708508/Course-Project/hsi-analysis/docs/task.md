@@ -1,0 +1,35 @@
+# Task List
+
+- [x] Initialize Python package structure
+- [x] Create `pyproject.toml` configuration
+- [x] Implement ENVI header parser (`parser.py`)
+- [x] Implement CLI interface (`cli.py`)
+- [x] Create project README and package initialization
+- [x] Implement unit tests (`test_cli.py`)
+- [x] Install package locally and verify command-line execution
+- [x] Verify using the sample dataset and record results
+- [x] Implement `generate-images` command (`image_generator.py`)
+- [x] Generate and analyze 4 band images (Bands 1, 30, 60, 149)
+- [x] Add default output folder creation and custom `--output` argument
+- [x] Configure `.gitignore` to exclude all output directory files except `output/images/band_1.png`
+- [x] Implement `plot-spectra` command (`plot_spectra.py`)
+- [x] Generate and analyze spectral response plot (spectra_plot.png)
+- [x] Document the work in `docs/walkthroughs/plot-spectra.md`
+- [x] Implement `detect-inks` command (`detect_inks.py`)
+- [x] Document ink detection pattern recognition in `docs/walkthroughs/detect-inks.md`
+- [x] Implement color-labeling classified inks
+- [x] Implement PCA dimensionality reduction subcommand (`reduce_dimensions.py`)
+- [x] Register `reduce-dimensions` command in `cli.py`
+- [x] Add automated tests for PCA dimensionality reduction
+- [x] Run verification on the sample dataset and document findings
+- [x] Add PyTorch dependency to `pyproject.toml`
+- [x] Install PyTorch in the virtual environment
+- [x] Add `--using` argument to `reduce-dimensions` subcommand in `cli.py`
+- [x] Implement Convolutional Autoencoder logic in `reduce_dimensions.py`
+- [x] Add unit and integration tests for CAE dimensionality reduction
+- [x] Run verification for CAE dimensionality reduction and document findings
+- [x] Add `--method` argument to `detect-inks` subcommand in `cli.py`
+- [x] Refactor `reduce_dimensions.py` to expose helper projection functions
+- [x] Implement pca/cae feature clustering in `detect_inks.py`
+- [x] Add unit and integration tests for detect-inks with `--method pca/cae`
+- [x] Run verification for detect-inks methods, compare results and document findings
