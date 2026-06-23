@@ -43,7 +43,9 @@ if hasattr(sys.stderr, "reconfigure"):
 # ---------------------------------------------------------------------------
 IMAGE_SIZE: int = 16  # USPS images are 16 x 16 pixels
 NUM_LABELS: int = 10  # digits 0 - 9
-OUTPUT_DIR: str = "outputs/average_digits"  # directory to write PNG files into
+TRAINING_DIGITS_DIR: str = (
+    "outputs/training_digits"  # directory to write PNG files into
+)
 
 
 # ===========================================================================
@@ -182,7 +184,7 @@ def validate_average_shapes(average_images: Dict[int, np.ndarray]) -> None:
 
 def save_average_images(
     average_images: Dict[int, np.ndarray],
-    output_dir: str = OUTPUT_DIR,
+    output_dir: str = TRAINING_DIGITS_DIR,
 ) -> List[str]:
     """Normalizes and saves individual average representations as PNG files.
 
@@ -210,58 +212,12 @@ def save_average_images(
             normalised = np.zeros_like(arr, dtype=np.uint8)
 
         img = Image.fromarray(normalised, mode="L")
-        path = os.path.join(output_dir, f"average_digit_{label}.png")
+        path = os.path.join(output_dir, f"training_digit_{label}.png")
         img.save(path)
         saved_paths.append(os.path.abspath(path))
         print(f"  Saved: {path}")
 
     return saved_paths
-
-
-def save_montage(
-    average_images: Dict[int, np.ndarray],
-    output_dir: str = OUTPUT_DIR,
-    filename: str = "average_digits_grid.png",
-) -> str:
-    """Generates and saves a 1x10 horizontal montage grid of all average digits.
-
-    Digits are separated by a 2-pixel wide white divider to improve visual clarity.
-
-    Args:
-        average_images: Dictionary mapping digit labels to their computed average NumPy arrays.
-        output_dir: Directory where the montage should be saved.
-        filename: Destination filename of the montage image.
-
-    Returns:
-        The absolute path to the saved montage image.
-    """
-    tiles: List[np.ndarray] = []
-    for label in range(NUM_LABELS):
-        arr = average_images[label]
-        arr_min, arr_max = arr.min(), arr.max()
-        if arr_max > arr_min:
-            norm = ((arr - arr_min) / (arr_max - arr_min) * 255).astype(np.uint8)
-        else:
-            norm = np.zeros_like(arr, dtype=np.uint8)
-        tiles.append(norm)
-
-    # 2-pixel wide separator filled with white (255) pixels
-    sep_width = 2
-    sep_col = np.full((IMAGE_SIZE, sep_width), 255, dtype=np.uint8)
-
-    # Assemble horizontally with separators
-    rows = [tiles[0]]
-    for tile in tiles[1:]:
-        rows.append(sep_col)
-        rows.append(tile)
-
-    montage = np.concatenate(rows, axis=1)
-
-    os.makedirs(output_dir, exist_ok=True)
-    path = os.path.join(output_dir, filename)
-    Image.fromarray(montage, mode="L").save(path)
-    print(f"\nMontage saved: {path}")
-    return os.path.abspath(path)
 
 
 def display_average_images(average_images: Dict[int, np.ndarray]) -> None:
@@ -359,21 +315,16 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 7. Save individual average PNGs
     # ------------------------------------------------------------------
-    saved_paths = save_average_images(average_images, output_dir=OUTPUT_DIR)
+    saved_paths = save_average_images(average_images, output_dir=TRAINING_DIGITS_DIR)
 
     # ------------------------------------------------------------------
-    # 8. Save montage
-    # ------------------------------------------------------------------
-    montage_path = save_montage(average_images, output_dir=OUTPUT_DIR)
-
-    # ------------------------------------------------------------------
-    # 9. Display average images in Matplotlib
+    # 8. Display average images in Matplotlib
     # ------------------------------------------------------------------
     print("\n[Step 5] Displaying average images in Matplotlib...")
     display_average_images(average_images)
 
     # ------------------------------------------------------------------
-    # 10. Final summary
+    # 9. Final summary
     # ------------------------------------------------------------------
     print("\n" + "=" * 60)
     print("  SUMMARY")
@@ -385,7 +336,6 @@ def main() -> None:
     print("\n  Individual average images saved:")
     for p in saved_paths:
         print(f"    {p}")
-    print(f"\n  Montage saved: {montage_path}")
     print("\n  All average images were successfully saved.  [OK]")
     print("=" * 60)
 

@@ -13,7 +13,7 @@ Pipeline Overview:
     7. Resize to 16x16 via Lanczos resampling
     8. Colour inversion   -> dark-digit/light-paper => white-digit/black-background
     9. Pixel-array export + statistics + Matplotlib visualisation
-    10. Save processed_digit_16x16.png
+    10. Save test_digit.png
 
 Assumptions:
     - The image contains exactly one handwritten digit.
@@ -44,7 +44,8 @@ from tkinter import filedialog, messagebox
 TARGET_SIZE: int = 16  # Final image edge length (pixels)
 PADDING_FRACTION: float = 0.05  # Extra margin added around the bounding-box crop
 # (expressed as a fraction of the bounding-box size)
-OUTPUT_FILENAME: str = "outputs/processed_digit_16x16.png"
+OUTPUTS_DIR: str = "outputs"
+TEST_DIGIT_FILENAME: str = os.path.join(OUTPUTS_DIR, "test_digit.png")
 SUPPORTED_EXTENSIONS: Tuple[str, ...] = (".png", ".jpg", ".jpeg", ".bmp")
 
 # Use a non-interactive backend if no display is available (e.g. CI servers).
@@ -520,7 +521,7 @@ def show_debug_components(
         bbox_img, (left, top), (right, bottom), color=(255, 0, 0), thickness=2
     )
 
-    fig, axes = plt.subplots(1, 5, figsize=(20, 4), constrained_layout=True)
+    fig, axes = plt.subplots(1, 5, figsize=(16, 4), constrained_layout=True)
     fig.suptitle(
         "Debug: Connected-Component Analysis",
         fontsize=13,
@@ -579,7 +580,7 @@ def show_processing_stages(
     fig, axes = plt.subplots(
         nrows=1,
         ncols=6,
-        figsize=(22, 4),
+        figsize=(20, 4),
         constrained_layout=True,
     )
     fig.suptitle(
@@ -604,12 +605,12 @@ def show_processing_stages(
 # ===========================================================================
 
 
-def save_image(image: np.ndarray, output_path: str = OUTPUT_FILENAME) -> None:
+def save_image(image: np.ndarray, output_path: str = TEST_DIGIT_FILENAME) -> None:
     """Saves the processed 16x16 image as a PNG file.
 
     Args:
         image:       2D uint8 NumPy array to save.
-        output_path: Destination file path (default: processed_digit_16x16.png).
+        output_path: Destination file path (default: test_digit.png).
     """
     pil_img = Image.fromarray(image, mode="L")
     pil_img.save(output_path)
@@ -689,11 +690,11 @@ def process_digit_image(path: str) -> None:
 
     # ---- Save ----------------------------------------------------------------
     print("Saving image...")
-    save_image(final, OUTPUT_FILENAME)
+    save_image(final, TEST_DIGIT_FILENAME)
 
     # ---- Final summary -------------------------------------------------------
     print("Done.")
-    print_final_summary(OUTPUT_FILENAME)
+    print_final_summary(TEST_DIGIT_FILENAME)
 
 
 # ===========================================================================
