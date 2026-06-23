@@ -245,18 +245,105 @@ def build_cluster_extraction(
     cluster_index: int,
 ) -> np.ndarray:
     """
-    Return a copy of *image* where only pixels belonging to *cluster_index*
-    retain their original colour; all other pixels are set to black (0, 0, 0).
+    Return a 4-channel BGRA image where only pixels belonging to *cluster_index*
+    are fully opaque (alpha=255) with their original BGR colour; all other pixels
+    are fully transparent (alpha=0).
+
+    Steps:
+        1. Convert the source BGR image to BGRA (adds a fully-opaque alpha channel).
+        2. Build a boolean mask for pixels that do NOT belong to this cluster.
+        3. Set the alpha channel to 0 for those masked-out pixels.
+
+    Parameters:
+        image         – BGR uint8 image, shape (H, W, 3).
+        labels        – (H, W) integer label array from K-Means.
+        cluster_index – which cluster index to keep opaque.
+
+    Returns:
+        BGRA uint8 image of shape (H, W, 4).
     """
-    extracted = np.zeros_like(image)
-    mask = labels == cluster_index
-    extracted[mask] = image[mask]
-    return extracted
+    # Convert BGR -> BGRA; the new alpha channel starts at 255 (fully opaque)
+    bgra = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+
+    # Pixels NOT in this cluster get alpha = 0 (fully transparent)
+    outside_mask = labels != cluster_index
+    bgra[outside_mask, 3] = 0
+
+    return bgra
 
 
 # ---------------------------------------------------------------------------
 # 5. Matplotlib display
 # ---------------------------------------------------------------------------
+
+def _checkerboard_background(
+    height: int,
+    width: int,
+    tile: int = 16,
+    light: float = 0.85,
+    dark: float = 0.65,
+) -> np.ndarray:
+    """
+    Generate a grey checkerboard RGBA background of shape (H, W, 4).
+
+    Used as a backing layer so that transparent regions in the extracted
+    cluster images are visually distinguishable in Matplotlib (which does
+    not render PNG transparency on its own).
+
+    Parameters:
+        tile  – size of each checker square in pixels.
+        light – brightness of the light squares (0–1).
+        dark  – brightness of the dark squares (0–1).
+    """
+    # Build a tiled boolean grid: True = light square, False = dark square
+    row_idx = (np.arange(height) // tile) % 2   # alternates 0/1 per row-tile
+    col_idx = (np.arange(width)  // tile) % 2   # alternates 0/1 per col-tile
+    checker = (row_idx[:, None] ^ col_idx[None, :]).astype(bool)  # XOR
+
+    # Map True->light, False->dark, scale to uint8
+    grey = np.where(checker, light, dark)
+    grey_u8 = (grey * 255).astype(np.uint8)
+
+    # Broadcast into (H, W, 4) RGBA — fully opaque
+    bg = np.stack([grey_u8, grey_u8, grey_u8,
+                   np.full((height, width), 255, dtype=np.uint8)], axis=2)
+    return bg
+
+
+def _composite_rgba_on_background(
+    rgba: np.ndarray,
+    height: int,
+    width: int,
+) -> np.ndarray:
+    """
+    Alpha-composite a BGRA image onto a checkerboard background, then
+    convert to RGB for Matplotlib display.
+
+    Parameters:
+        rgba   – BGRA uint8 image of shape (H, W, 4).
+        height – image height.
+        width  – image width.
+
+    Returns:
+        RGB uint8 image of shape (H, W, 3) ready for ax.imshow().
+    """
+    # Convert BGRA -> RGBA for standard alpha-compositing
+    rgba_rgb_order = cv2.cvtColor(rgba, cv2.COLOR_BGRA2RGBA).astype(np.float32)
+
+    # Normalise alpha to [0, 1]
+    alpha = rgba_rgb_order[:, :, 3:4] / 255.0
+
+    # Checkerboard background as float
+    bg = _checkerboard_background(height, width).astype(np.float32)
+    bg_rgb = bg[:, :, :3]   # drop the alpha channel of the background
+
+    # Foreground RGB (from the RGBA image)
+    fg_rgb = rgba_rgb_order[:, :, :3]
+
+    # Standard over-compositing: out = fg * alpha + bg * (1 - alpha)
+    composited = fg_rgb * alpha + bg_rgb * (1.0 - alpha)
+    return composited.astype(np.uint8)
+
 
 def display_results(
     original:    np.ndarray,
@@ -268,17 +355,23 @@ def display_results(
     """
     Display all five images (original + 4 outputs) in a single Matplotlib
     figure with descriptive titles.
+
+    The three extracted cluster images (fg, bg, noise) are BGRA; they are
+    alpha-composited over a grey checkerboard before display so that
+    transparent regions are clearly visible.
     """
-    # Helper: convert BGR to RGB for Matplotlib
+    # Helper: convert BGR to RGB for Matplotlib (used for 3-channel images)
     def bgr2rgb(img):
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    h, w = original.shape[:2]
+
     images = [
-        (bgr2rgb(original),    "Original Image"),
-        (bgr2rgb(vis),         "Cluster Visualisation\n(Red=FG · Green=BG · Blue=Noise)"),
-        (bgr2rgb(fg_image),    "Foreground Cluster\n(dark text / ink)"),
-        (bgr2rgb(bg_image),    "Background Cluster\n(page colour)"),
-        (bgr2rgb(noise_image), "Noise Cluster\n(artefacts / shadows)"),
+        (bgr2rgb(original),                                  "Original Image"),
+        (bgr2rgb(vis),                                       "Cluster Visualisation\n(Red=FG, Green=BG, Blue=Noise)"),
+        (_composite_rgba_on_background(fg_image,    h, w),   "Foreground Cluster\n(dark text / ink)"),
+        (_composite_rgba_on_background(bg_image,    h, w),   "Background Cluster\n(page colour)"),
+        (_composite_rgba_on_background(noise_image, h, w),   "Noise Cluster\n(artefacts / shadows)"),
     ]
 
     fig = plt.figure(figsize=(20, 8))
