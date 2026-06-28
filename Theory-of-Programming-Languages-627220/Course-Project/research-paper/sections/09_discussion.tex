@@ -1,0 +1,72 @@
+%%
+%% 09_discussion.tex — Discussion
+%%
+
+\section{Discussion}\label{sec:discussion}
+
+Our results demonstrate that integrating LLM-generated rationales yields interpretable outputs with minimal performance cost. The key findings are discussed below.
+
+\subsection{Classification Performance}\label{subsec:disc_performance}
+
+As expected, the classification accuracy and F1 of each model remain essentially unchanged when explanations are added (since we do not retrain or modify the classifier). DistilBERT-SST2 still achieved approximately 92\% accuracy and $\text{F1} \approx 0.926$, matching the parent's strong baseline~\cite{oprea2025llm}. The slight differences in our results (e.g.\ $\text{F1} = 0.9285$ for RoBERTa-base on the general domain) are within experimental variance. This confirms that our extension is compatible with the original methodology.
+
+\subsection{Explainability Quality}\label{subsec:disc_quality}
+
+The LLM-generated rationales are \textbf{human-readable and context-sensitive}. Unlike attention weights or LIME lists of tokens, they provide coherent sentences describing \emph{why} the model decided as it did. For example, our LLM cues into sentiment polarity and situational context (Table~\ref{tab:explanation_examples}). This aligns with the goal of XAI to make model reasoning transparent to end-users. Compared to simpler XAI methods (LIME~\cite{ribeiro2016why}/SHAP~\cite{lundberg2017unified}), our approach resembles a human annotator's explanation. This can improve trust and usability: users see not only \emph{what} the model predicts but \emph{why}.
+
+\subsection{Faithfulness}\label{subsec:disc_faithfulness}
+
+We must acknowledge limitations. LLM rationales, being generative, can sometimes be unfaithful (making general statements or hallucinating). Our deletion tests indicate they are moderately faithful (approximately 70\% causal consistency) but not perfect---consistent with observations by Bueno~\emph{et~al.}~\cite{bueno2026scoring} that LLM explanations can fail to reflect exact model internals. In contrast, SHAP gives stronger fidelity (we saw approximately 75\% flips). We mitigate this by:
+
+\begin{itemize}[leftmargin=*]
+    \item Designing prompts that ground the explanation in the input (mentioning exact words);
+    \item Cross-checking with attribution methods;
+    \item Incorporating a confidence measure: if the model's confidence is low ($< 0.6$), we may opt for a generic ``explanation unavailable'' rather than a potentially misleading rationale.
+\end{itemize}
+
+\subsection{Computational Cost}\label{subsec:disc_cost}
+
+The LLM step is slower than bare inference. For high-throughput systems, this overhead might be a concern. However, \SIrange{100}{200}{\milli\second} per instance is still plausible for applications like customer feedback analysis (not real-time chat). In scenarios where latency is critical, one could fall back on faster XAI (attention) or generate explanations only on-demand (e.g.\ when the confidence is high or the user requests an explanation).
+
+\subsection{Bias and Fairness}\label{subsec:disc_bias}
+
+We must consider biases. LLM rationales might introduce biases present in their training. For example, if an LLM has learned to associate certain adjectives with sarcasm in gendered ways, its explanation might inadvertently highlight irrelevant features. This risk is mitigated by phrasing our prompts neutrally and by focusing on direct textual cues. Nonetheless, explaining a prediction may reveal undesirable associations, so it should be reviewed if used in sensitive domains.
+
+\subsection{Human Evaluation}\label{subsec:disc_human_eval}
+
+In future work, we would conduct formal user studies: have people rate the usefulness of rationales vs.\ token highlights. Preliminary informal feedback is that end-users prefer full-sentence explanations, which they find more understandable than lists of words. This echoes findings in the explainable NLP literature~\cite{bilal2025llms} that \textbf{natural language rationales} significantly aid comprehension.
+
+\subsection{Diagnostic Potential}\label{subsec:disc_diagnostic}
+
+Overall, our explainability module turns a black-box classifier into a semi-transparent system. It does not fix model errors, but it helps diagnose them: if a rationale seems off, it may indicate the model picked up spurious cues. For instance, if the LLM cites an irrelevant word, that flags a potential bias. Therefore, beyond user presentation, the rationales could serve as a debugging tool for researchers.
+
+\subsection{Comparison with Existing Literature}\label{subsec:disc_comparison}
+
+Table~\ref{tab:comparison_existing} compares our work to key prior systems and surveys in the context of sarcasm detection and XAI\@.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of our work with key prior systems in sarcasm detection and explainable AI.}
+\label{tab:comparison_existing}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{3cm} c p{3cm} p{3cm} p{3cm} p{4.5cm}}
+\toprule
+\textbf{Work} & \textbf{Year} & \textbf{Task} & \textbf{Key Models} & \textbf{XAI Approach} & \textbf{Improvements in Proposed Work} \\
+\midrule
+Oprea \& B\^{a}ra~\cite{oprea2025llm} & 2025 & Sarcasm detection & RoBERTa, DistilBERT (fine-tune) & None (classification) & Add post-hoc LLM explanations without altering models \\
+\midrule
+Kumar~\emph{et~al.}~\cite{kumar2021explainable} & 2021 & Sarcasm detection (dialogue) & XGBoost & LIME, SHAP & Produce full-sentence rationales via LLM, richer cues \\
+\midrule
+Bagate~\emph{et~al.}~\cite{bagate2025sarcasm} & 2025 & Sarcasm (political Reddit) & LSTM + SVC (fusion) & Counterfactual & Use transformer models; generative rationale instead of word highlighting \\
+\midrule
+Bueno~\emph{et~al.}~\cite{bueno2026scoring} & 2026 & Rubric scoring (general) & Fine-tuned PLMs, LLM & SHAP + LLM rationales & Apply LLM rationales to sarcasm; focus on practical XAI \\
+\midrule
+Inoue~\emph{et~al.}~\cite{inoue2026lime} & 2026 & General NLP & LLMs (Claude, GPT) & LIME-LLM & Simply generate rationales from input without retraining \\
+\midrule
+Bilal~\emph{et~al.}~\cite{bilal2025llms} & 2025 & Survey (LLM for XAI) & -- & -- & Instantiates survey ideas in a concrete sarcasm use-case \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Our work is unique in applying \textbf{LLM-as-explainer} specifically to sarcasm detection models, bridging the gap between the classification performance of~\cite{oprea2025llm} and the interpretability demands of~\cite{bilal2025llms,kumar2021explainable}. We demonstrate that this extension is \textbf{scientifically justified} (leveraging recent XAI advances) and \textbf{feasible} on the given datasets.

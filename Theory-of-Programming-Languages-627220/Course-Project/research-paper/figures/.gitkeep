@@ -1,0 +1,15 @@
+% Placeholder file for the figures/ directory.
+% Place all figure files (.pdf, .png, .eps) in this directory.
+%
+% Expected figures:
+%   - overall_architecture.pdf      (Fig. 2: Overall system architecture)
+%   - inference_pipeline.pdf        (Fig. 4: Inference + explanation flowchart)
+%   - training_pipeline.pdf         (Fig. 3: Training pipeline flowchart)
+%   - confusion_matrix_roberta_base.pdf  (Fig. 5: Confusion matrix)
+%   - roc_curves.pdf                (Fig. 6: ROC curves for all models)
+%   - precision_recall_comparison.pdf    (Fig. 7: Precision/Recall bar chart)
+%   - explainability_pipeline.pdf   (Explainability pipeline diagram)
+%   - evaluation_pipeline.pdf       (Evaluation pipeline diagram)
+%
+% The TikZ-based proposed pipeline (Fig. 1) is generated inline in
+% sections/04_methodology.tex and does not require an external file.

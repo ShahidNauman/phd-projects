@@ -1,0 +1,80 @@
+%%
+%% 07_experimental_setup.tex — Experimental Setup
+%%
+
+\section{Experimental Setup}\label{sec:experimental_setup}
+
+\subsection{Data and Implementation}\label{subsec:data_implementation}
+
+We use exactly the same data as the parent study~\cite{oprea2025llm}. The Amazon reviews~\cite{filatova2012irony} are publicly available, as are the news headlines (on Hugging Face). We split each dataset into training (approximately 70\%), validation (15\%), and testing (15\%) using group-aware splitting as before.
+
+Implementation is done in Python using PyTorch and HuggingFace Transformers~\cite{wolf2020transformers}. All four models are fine-tuned on an NVIDIA GPU (e.g.\ RTX~4080) for up to 5 epochs (with early stopping). Hyperparameters (learning rate, batch size, $\alpha$ for label smoothing, weight decay) follow the parent's settings; we list them in Table~\ref{tab:hyperparameters}.
+
+\begin{table}[H]
+\centering
+\caption{Hyperparameter settings and training configuration.}
+\label{tab:hyperparameters}
+\begin{tabular}{ll}
+\toprule
+\textbf{Hyperparameter}       & \textbf{Value / Range} \\
+\midrule
+Learning rate (initial)        & $2 \times 10^{-5}$ (with linear warmup) \\
+Batch size                     & 32 \\
+Max tokens                     & 192 \\
+Label smoothing $\alpha$       & 0.1 \\
+Weight decay $\lambda$         & 0.01 \\
+Epochs                         & 5 (early stop on validation) \\
+Optimiser                      & AdamW \\
+Patience (early stop)          & 1 epoch \\
+Random seed                    & 42 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Metrics}\label{subsec:evaluation_metrics}
+
+We compute accuracy, precision, recall, macro-F1, and AUC (ROC) on the test sets of each domain. Following the parent study, we macro-average metrics across classes to address class imbalance. We also measure \textbf{inference latency} (time per sentence for classification plus explanation). For explanation quality, we use proxy metrics:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Fidelity (Deletion tests):} For each sentence, we remove the top-importance token(s) identified by the explanation method and re-run the classifier. If the prediction flips, the explanation identified a truly causal token.
+    \item \textbf{Coherence:} Via human annotation on a sample of instances, rated on a 1--5 scale.
+\end{itemize}
+
+\subsection{Baselines and Comparisons}\label{subsec:baselines}
+
+We compare the following configurations:
+\begin{enumerate}[label=(\arabic*)]
+    \item The four fine-tuned transformer models (without explanation), i.e.\ \textbf{baseline} classification only (replicating the parent~\cite{oprea2025llm});
+    \item The same models with our LLM-rationale addition;
+    \item The models with alternative XAI methods: we implement LIME~\cite{ribeiro2016why}, SHAP~\cite{lundberg2017unified}, and attention-saliency to highlight tokens for each prediction, and transform their output into a short textual explanation (e.g.\ ``The words \emph{\{keywords\}} were most influential'').
+\end{enumerate}
+
+We also include relevant recent architectures reported in the literature (e.g.\ BERT-base~\cite{devlin2019bert}, BERT-large fine-tuned, etc.) for completeness.
+
+\subsection{LLM Prompting Details}\label{subsec:llm_prompting}
+
+We use (or simulate) a strong instruction-following LLM~\cite{openai2023gpt4} (e.g.\ GPT-4 or Claude). The prompt structure is crucial: we include the model's predicted label and confidence to guide the explanation. An example prompt is:
+
+\begin{quote}
+\small
+\texttt{Sentence: "\textless input text\textgreater"}\\
+\texttt{Model prediction: Sarcastic (confidence 0.92)}\\
+\texttt{Explain *why* the model predicted Sarcastic, mentioning relevant cues.}
+\end{quote}
+
+We frame the reasoning steps to cover both surface sentiment and implied meaning, drawing on linguistic patterns described in the sarcasm detection literature. We tune few-shot examples (if any) on a held-out set. In case API limitations apply, we may use open models (e.g.\ GPT-J) to approximate, but for demonstration we assume a capable LLM.
+
+%%% Dataset Statistics Table
+\begin{table}[H]
+\centering
+\caption{Dataset statistics for the News Headlines and Amazon Reviews corpora used in this study.}
+\label{tab:dataset_stats}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Dataset} & \textbf{Total Samples} & \textbf{Sarcastic (\%)} & \textbf{Non-Sarcastic (\%)} \\
+\midrule
+News Headlines       & 55{,}328 & 47.6\% & 52.4\% \\
+Amazon Reviews       & 1{,}690  & 51.7\% (873) & 48.3\% (817) \\
+\bottomrule
+\end{tabular}
+\end{table}

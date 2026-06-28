@@ -1,0 +1,62 @@
+%%
+%% 05_mathematical_formulation.tex — Mathematical Formulation
+%%
+
+\section{Mathematical Formulation}\label{sec:math_formulation}
+
+We retain the parent paper's formalism~\cite{oprea2025llm}, redefining notation as needed.
+
+\subsection{Classification Model}\label{subsec:classification_model}
+
+Let the input text $x = (w_1, \ldots, w_T)$ be tokenised into embeddings $\mathbf{x} \in \mathbb{R}^{T \times d}$, where $T$ is the sequence length and $d$ is the embedding dimension. The transformer model~\cite{vaswani2017attention} computes a contextualised representation $\mathbf{h}$ of the input. The logits are obtained via a linear classification head:
+\begin{equation}\label{eq:logits}
+    \mathbf{z} = W \mathbf{h} + \mathbf{b},
+\end{equation}
+where $W \in \mathbb{R}^{2 \times d_h}$ and $\mathbf{b} \in \mathbb{R}^{2}$ are the output weight matrix and bias vector, respectively, and $\mathbf{h} \in \mathbb{R}^{d_h}$ is the transformer encoding (typically the \texttt{[CLS]} token representation).
+
+The softmax probability for class $c \in \{0, 1\}$ (where $0$ denotes Non-Sarcastic and $1$ denotes Sarcastic) is:
+\begin{equation}\label{eq:softmax}
+    p(c \mid x;\, \theta) = \frac{\exp(z_c)}{\sum_{c'} \exp(z_{c'})}.
+\end{equation}
+
+The predicted label is:
+\begin{equation}\label{eq:prediction}
+    \hat{y} = \arg\max_{c}\; p(c \mid x;\, \theta).
+\end{equation}
+
+\subsection{Training Objective}\label{subsec:training_objective}
+
+We train by minimising the label-smoothed cross-entropy loss. For true label $y \in \{0, 1\}$ and smoothing parameter $\alpha$, the loss per example is:
+\begin{equation}\label{eq:label_smoothed_ce}
+    \mathcal{L}_{\text{CE}}(x, y) = -\sum_{c \in \{0,1\}} \tilde{y}_c \log p(c \mid x;\, \theta),
+\end{equation}
+where the smoothed label vector is defined as:
+\begin{equation}\label{eq:smoothed_labels}
+    \tilde{y} = (1 - \alpha)\, \mathbf{e}_y + \frac{\alpha}{2}\, (1, 1),
+\end{equation}
+and $\mathbf{e}_y$ is the one-hot encoding of the true class $y$.
+
+Combined with L2 weight decay $\lambda$, the total objective is:
+\begin{equation}\label{eq:total_loss}
+    \mathcal{L} = \mathcal{L}_{\text{CE}} + \lambda \|\theta\|_2^2,
+\end{equation}
+where bias terms and LayerNorm parameters are excluded from the regularisation.
+
+\subsection{Explainability Formulation}\label{subsec:explainability_formulation}
+
+For explainability, one might define an \textbf{interpretation score} $I(x, c)$ denoting how strongly token $w_i$ influences $p(c \mid x)$. Methods like SHAP~\cite{lundberg2017unified} or LIME~\cite{ribeiro2016why} produce attributions $I_i = \phi_i(x, c)$ for each token (not detailed here as we employ them as baselines only).
+
+In our LLM-based approach, we do not compute scores mathematically; instead, we let a generative model produce text. Formally, we can view the rationale generation as sampling from an \emph{explanation distribution}:
+\begin{equation}\label{eq:rationale_generation}
+    r \sim \text{LLM}\!\left(\texttt{``Explain sentence } x \texttt{ as } c\texttt{.''}\right),
+\end{equation}
+where $r$ is a sequence of words constituting the rationale. One could define a \textbf{faithfulness reward} $R(x, c, r)$ measuring how well $r$ aligns with the predicted class $\hat{y} = c$, but in this work we evaluate explanation quality externally (see Section~\ref{sec:results}).
+
+\subsection{Explanation Confidence}\label{subsec:explanation_confidence}
+
+Finally, we define an \textbf{explanation confidence} as the softmax probability of the predicted class (or equivalently, the margin from~$0.5$):
+\begin{equation}\label{eq:explanation_confidence}
+    \text{conf}(x) = p(\hat{y} \mid x;\, \theta).
+\end{equation}
+
+This confidence enters the prompt to calibrate the explanation. For example, the prompt may state \emph{``with probability $0.94$, the model predicted Sarcastic because\ldots''} If $\text{conf}(x) < 0.7$, we either omit the rationale or preface it with low-confidence phrasing (see Section~\ref{sec:discussion}).

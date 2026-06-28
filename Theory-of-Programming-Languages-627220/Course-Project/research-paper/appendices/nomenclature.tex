@@ -1,0 +1,67 @@
+%%
+%% appendices/nomenclature.tex — Nomenclature Appendix
+%%
+
+\section{Nomenclature}\label{app:nomenclature}
+
+Table~\ref{tab:nomenclature} lists the principal symbols and abbreviations used throughout this paper.
+
+\begin{longtable}{p{3cm} p{10cm}}
+\caption{Nomenclature: symbols and abbreviations used in this paper.}
+\label{tab:nomenclature} \\
+\toprule
+\textbf{Symbol / Abbreviation} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Symbol / Abbreviation} & \textbf{Description} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r}{\emph{Continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+
+$x = (w_1, \ldots, w_T)$  & Input text sequence of $T$ tokens \\
+$\mathbf{x} \in \mathbb{R}^{T \times d}$ & Token embedding matrix ($T$ tokens, $d$-dimensional embeddings) \\
+$d$                        & Embedding dimension \\
+$d_h$                      & Hidden representation dimension of the classification head \\
+$\mathbf{h}$               & Transformer encoding (typically the \texttt{[CLS]} token representation) \\
+$W, \mathbf{b}$            & Weight matrix and bias vector of the classification head \\
+$\mathbf{z}$               & Logit vector $\mathbf{z} = W\mathbf{h} + \mathbf{b}$ \\
+$c \in \{0, 1\}$           & Class label ($0 =$ Non-Sarcastic, $1 =$ Sarcastic) \\
+$p(c \mid x;\, \theta)$    & Softmax probability of class $c$ given input $x$ and parameters $\theta$ \\
+$\hat{y}$                  & Predicted label $\hat{y} = \arg\max_c\, p(c \mid x;\, \theta)$ \\
+$y$                        & True (ground-truth) label \\
+$\tilde{y}$                & Label-smoothed target vector \\
+$\alpha$                   & Label smoothing parameter \\
+$\mathbf{e}_y$             & One-hot encoding of the true class $y$ \\
+$\mathcal{L}_{\text{CE}}$  & Label-smoothed cross-entropy loss \\
+$\lambda$                  & L2 weight decay coefficient \\
+$\theta$                   & Model parameters (weights) \\
+$\theta^{*}_m$             & Best fine-tuned parameters for model $m$ \\
+$\eta$                     & Learning rate \\
+$B$                        & Mini-batch size \\
+$T$ (epochs)               & Maximum number of training epochs \\
+$P$                        & Early stopping patience (in epochs) \\
+$r$                        & Generated natural-language rationale \\
+$R(x, c, r)$               & Faithfulness reward measuring alignment of rationale $r$ with prediction $c$ \\
+$I_i, \phi_i(x, c)$        & Interpretation / attribution score for token $w_i$ \\
+$\text{conf}(x)$           & Explanation confidence: $p(\hat{y} \mid x;\, \theta)$ \\
+\midrule
+\multicolumn{2}{l}{\textbf{Abbreviations}} \\
+\midrule
+LLM                        & Large Language Model \\
+XAI                        & Explainable Artificial Intelligence \\
+NLP                        & Natural Language Processing \\
+LIME                       & Local Interpretable Model-agnostic Explanations \\
+SHAP                       & SHapley Additive exPlanations \\
+IG                         & Integrated Gradients \\
+F1                         & F1-score (harmonic mean of precision and recall) \\
+AUC                        & Area Under the Curve (ROC) \\
+ROC                        & Receiver Operating Characteristic \\
+API                        & Application Programming Interface \\
+SST-2                      & Stanford Sentiment Treebank (binary) \\
+RAG                        & Retrieval-Augmented Generation \\
+\end{longtable}

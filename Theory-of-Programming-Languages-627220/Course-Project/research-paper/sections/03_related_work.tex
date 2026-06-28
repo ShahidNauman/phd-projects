@@ -1,0 +1,52 @@
+%%
+%% 03_related_work.tex — Literature Review / Related Work
+%%
+
+\section{Related Work}\label{sec:related_work}
+
+\subsection{Sarcasm Detection}\label{subsec:sarcasm_detection}
+
+Early sarcasm detection methods used feature engineering (punctuation, word patterns, sentiment flip) and traditional machine learning (SVM, Random Forest). Deep learning and hybrid models later dominated the field. For example, Sharma~\emph{et~al.}~\cite{sharma2020deep} trained CNNs and LSTMs on tweets and Reddit posts, achieving approximately 90\% accuracy. Multimodal approaches incorporate images alongside text (e.g.\ a ``comic'' dialogue context). Transformer-based models (BERT~\cite{devlin2019bert}, RoBERTa~\cite{liu2019roberta}, XLNet, etc.) have more recently set new state-of-the-art results. The parent work~\cite{oprea2025llm} finds that fine-tuned transformers achieve macro F1 scores in $[0.878\text{--}0.943]$ on sarcasm corpora. Particularly, DistilBERT~\cite{sanh2019distilbert} pre-trained on sentiment (SST-2) gave the most stable $0.8784$ macro-F1 across diverse domains.
+
+\subsection{Transformer Models and Baselines}\label{subsec:transformer_baselines}
+
+Comparative studies show deep transformers outperform LSTMs and feature-based methods in sarcasm detection. For example, RoBERTa-large and RoBERTa-base fine-tuned on headlines achieved 94.3\% accuracy ($\text{F1} = 0.9425$), whereas smaller models like DistilBERT trade off some performance for efficiency. Other works have evaluated BERT with BiLSTM, ensemble CNN-LSTM, etc., on various languages (Hindi, Arabic) and domains. In summary, transformer fine-tuning on in-domain data is now standard practice, motivating us to reuse exactly the setup of~\cite{oprea2025llm} for compatibility.
+
+\subsection{Explainability in NLP and Sarcasm}\label{subsec:xai_nlp}
+
+\textbf{Post-hoc explanation techniques} have become common in NLP to interpret black-box models. LIME~\cite{ribeiro2016why} and SHAP~\cite{lundberg2017unified} generate token importance scores via perturbations or Shapley values. Integrated Gradients~\cite{sundararajan2017axiomatic} and attention visualization are also used. In sarcasm detection specifically, Kumar~\emph{et~al.}~\cite{kumar2021explainable} applied XGBoost with LIME/SHAP on the MUStARD dialogue corpus; their explanations highlight the words driving the model's sarcastic/not judgment. Bagate~\emph{et~al.}~\cite{bagate2025sarcasm} used an LSTM+SVC fusion on a self-annotated Reddit political dataset, and implemented counterfactual explanation: by permuting words, they identify which word change flips the model's sarcasm prediction. They find counterfactual highlights intuitive cues (e.g.\ the word whose removal breaks the sarcasm). Both works report that explanation (words highlighted by LIME/SHAP or counterfactual) aids human understanding, but neither integrates generative rationales.
+
+Attention-based interpretability has been explored as well: some models deliberately enforce interpretable attention (e.g.\ multi-head self-attention with sparsity) for sarcasm. However, attention weights alone may not yield human-plausible explanations (they often require aggregation or thresholding). Recent surveys of NLP XAI~\cite{bilal2025llms} note the diversity of explanation formats: token importance, gradients, or \emph{natural language rationales}. Indeed, increasingly researchers are using LLMs themselves to \textbf{generate textual explanations}.
+
+Bueno~\emph{et~al.}~\cite{bueno2026scoring} propose combining model-agnostic feature attribution (SHAP) with LLM-generated rationales, and find that while LLM explanations are fluent, SHAP attributions are typically more faithful to model decisions. Inoue~\emph{et~al.}~\cite{inoue2026lime} introduce LIME-LLM, using an LLM (Anthropic Claude) to produce fluent counterfactual edits for LIME; their method outperforms vanilla LIME/SHAP and matches integrated gradients in aligning with human rationales. Meanwhile, Li~\emph{et~al.}~\cite{li2025drift} show that naively prompting LLMs yields unfaithful reasoning, and propose a dual-reward ``Drift'' method to improve faithfulness of LLM rationales to model behaviour. Our work is inspired by these trends: we adopt LLM prompting to generate explanations post-hoc, but we also critically evaluate faithfulness and compare to established XAI methods.
+
+\subsection{Literature Comparison}\label{subsec:lit_comparison}
+
+Table~\ref{tab:literature_comparison} contrasts key recent studies (including the parent paper) on sarcasm detection and explainability.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of related work on sarcasm detection and explainability.}
+\label{tab:literature_comparison}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{2.8cm} p{3.2cm} p{2.8cm} p{2.4cm} p{3.8cm} p{3.8cm} p{4.2cm}}
+\toprule
+\textbf{Authors (Year)} & \textbf{Dataset} & \textbf{Model} & \textbf{Explain.} & \textbf{Advantages} & \textbf{Limitations} & \textbf{Contributions} \\
+\midrule
+Oprea \& B\^{a}ra~\cite{oprea2025llm} (2025) & News headlines (55k), Amazon reviews & RoBERTa-large/base, DistilBERT, DistilBERT-SST2 & None (baseline) & Systematic evaluation of multiple transformers; group-aware splits; high macro-F1 ($>0.94$) & No model interpretability beyond reproducible pipeline & Provides a robust, reproducible baseline for sarcasm classification \\
+\midrule
+Kumar~\emph{et~al.}~\cite{kumar2021explainable} (2021) & MUStARD dialogue corpus & XGBoost & LIME, SHAP & Contextual dialogue sarcasm; highlights word-level influence & Uses classic ML; limited by hand-crafted features & Shows interpretability in conversation sarcasm \\
+\midrule
+Bagate~\emph{et~al.}~\cite{bagate2025sarcasm} (2025) & Reddit political (self-annotated) & LSTM + SVC fusion & Counterfactual & Domain focus; ensemble improves F1; counterfactual highlights key words & Costly counterfactual search; only word highlighting & Introduces counterfactual XAI to identify sarcasm-driving words \\
+\midrule
+Bueno~\emph{et~al.}~\cite{bueno2026scoring} (2026) & CLASS teaching transcripts & Fine-tuned PLMs, LLMs & SHAP + LLM rationales & Combines SHAP \& LLM; develops evaluation framework & Focus on scoring, not sarcasm; LLM rationales less faithful & Demonstrates methodologies to evaluate LLM explanations \\
+\midrule
+Inoue~\emph{et~al.}~\cite{inoue2026lime} (2026) & SST-2, CoLA, HateXplain & LLMs (Claude, GPT) & LIME-LLM & Generative LIME; outperforms LIME/SHAP; high alignment with human rationales & Requires LLM calls per sample; not tested on sarcasm & Shows LLM-generated counterfactuals improve explanation fidelity \\
+\midrule
+\textbf{This work (2026)} & Same as~\cite{oprea2025llm} & Same transformers (fine-tuned) & LLM-generated textual rationales & LLM rationale provides human-readable explanations; retains original accuracy & Dependent on LLM availability; faithfulness must be measured & Extends prior pipeline by adding practical LLM-based XAI module \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+This survey shows a clear evolution: earlier sarcasm detection focused on accuracy~\cite{oprea2025llm} or basic interpretability~\cite{kumar2021explainable,bagate2025sarcasm}. Recent trends incorporate \textbf{LLM-based explanations}~\cite{bueno2026scoring,inoue2026lime} and evaluate faithfulness. Our proposed work builds on these advances by applying free-form rationale generation specifically for sarcasm, guided by known cues (contextual incongruity, sentiment flip, irony markers) in a domain-specific yet generalizable way.

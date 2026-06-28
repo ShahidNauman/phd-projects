@@ -1,0 +1,7 @@
+%%
+%% 01_abstract.tex — Abstract for Springer SN Computer Science
+%%
+
+\abstract{
+We extend the sarcasm detection framework of Oprea and B\^{a}ra (2025) by integrating an explainability module that generates natural-language rationales for each prediction. Using the same two datasets (a sarcastic news headline corpus and an Amazon product reviews corpus) and fine-tuning the same transformer models (RoBERTa-large, RoBERTa-base, DistilBERT, DistilBERT-SST2) under the identical training regime, we maintain their classification performance baseline. During inference, however, we invoke a large language model (LLM) (e.g.\ GPT-4) in a \emph{post-hoc} manner to produce an explanation of \textbf{why} a sentence is (non-)sarcastic, highlighting cues such as sentiment incongruity, rhetorical devices, and implicit meaning. Our system thus outputs both the label (Sarcastic/Non-Sarcastic) and a human-understandable rationale. We benchmark against the original models and recent explainable NLP methods (LIME, SHAP, attention saliency) on accuracy, F1-score, inference latency, and explanation quality. We find that incorporating LLM-generated rationales yields minimal impact on classification accuracy (comparable F1) while substantially improving interpretability. User studies (or proxy metrics) indicate that LLM rationales align well with intuitive human reasoning.
+}

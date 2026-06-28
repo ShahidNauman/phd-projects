@@ -1,0 +1,25 @@
+%%
+%% 11_future_work.tex — Future Work
+%%
+
+\section{Future Work}\label{sec:future_work}
+
+Future directions include:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Human Evaluation of Explanations:} Conduct formal user studies to quantify how much LLM rationales improve human understanding and decision-making compared to the baseline. Specifically, we plan controlled experiments with Likert-scale questionnaires measuring perceived trust, comprehension accuracy, and task completion time when explanations are provided versus when they are not.
+
+    \item \textbf{Multimodal Sarcasm:} Extend the framework to image-and-text memes, where the explanation would need to refer to both modalities (graphical cues and text). Recent multimodal sarcasm detection models~\cite{yao2023m3n2} provide a natural starting point for this extension.
+
+    \item \textbf{Interactive XAI:} Develop an interface where users can ask follow-up questions about a prediction (e.g.\ ``Why did you say positive word indicates sarcasm?'') and get dynamic LLM responses. This conversational approach could further improve user understanding and trust.
+
+    \item \textbf{Knowledge-Enhanced Explanations:} Incorporate external knowledge (product specifications, current events) into the rationale, possibly by augmenting the prompt with retrieval-augmented generation (RAG). This could help the model explain sarcasm that relies on world knowledge or topical references.
+
+    \item \textbf{Cross-Lingual Extension:} Test the pipeline on sarcastic text in other languages, using multilingual transformers and multilingual LLMs. Sarcasm expression varies significantly across cultures and languages, presenting unique challenges for both detection and explanation.
+
+    \item \textbf{Efficiency Improvements:} Optimise LLM queries (e.g.\ batching, distillation, or caching) to reduce latency for deployment. Smaller, domain-specific language models distilled from larger LLMs could provide rationales at significantly lower cost.
+
+    \item \textbf{Faithfulness Improvements:} Adopt techniques from Li~\emph{et~al.}~\cite{li2025drift} (dual-reward probabilistic inference) to improve the faithfulness of LLM-generated rationales to the actual model decision process, reducing the risk of unfaithful or hallucinated explanations.
+
+    \item \textbf{Confidence-Calibrated Explanations:} Conduct a rigorous quantitative evaluation of confidence-aware explanation strategies (Section~\ref{subsec:ablation}), where low-confidence predictions receive appropriately hedged or suppressed rationales.
+\end{itemize}

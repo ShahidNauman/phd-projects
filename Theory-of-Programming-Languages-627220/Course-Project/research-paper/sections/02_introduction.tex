@@ -1,0 +1,21 @@
+%%
+%% 02_introduction.tex — Introduction
+%%
+
+\section{Introduction}\label{sec:introduction}
+
+Sarcasm detection in text is notoriously challenging because the literal polarity of a statement often diverges from its speaker's intended sentiment, creating pragmatic incongruity. For example, the sentence ``Staying up till 2:30am was a brilliant idea to miss my office meeting'' contains a positive word \emph{``brilliant''} but conveys a negative (sarcastic) meaning. Transformer-based models fine-tuned on domain-specific data can achieve high accuracy (macro F1 up to 0.94 on headlines in~\cite{oprea2025llm}), yet their decisions are opaque. Users (and downstream systems) often demand \textbf{explanations} for why a sentence is classified as sarcastic or not, especially in critical applications (moderation, customer support) or to build trust.
+
+The \emph{parent study}~\cite{oprea2025llm} provides a transparent and reproducible baseline for sarcasm detection: it uses two public datasets (news headlines and Amazon reviews), a group-aware train/test split, and evaluates four HuggingFace transformers. However, it stops at classification accuracy. In this work, we \textbf{extend} their pipeline by adding a post-hoc explainability module at inference time. Given an input sentence and its predicted label, our module queries an LLM (e.g.\ via prompting) to generate a natural-language rationale: for instance, ``This sentence is sarcastic because it uses a positive adjective (`brilliant') in an adverse situation (`miss my meeting'), indicating sentiment contradiction.'' This approach leverages the generative power of LLMs to articulate context-specific cues. Crucially, we \textbf{do not change the training data or classification models}; the explainability component is applied only after the prediction is made, making it a \emph{plug-in} extension.
+
+The \textbf{novelty} of our work lies in practical XAI: we systematically integrate LLM-generated rationales into a proven sarcasm detection system. Unlike prior work that focused on feature-based explanations or attention heatmaps, we produce fluent human-readable explanations. We also compare multiple explainability strategies (LIME, SHAP, attention visualization) to justify why our LLM-based rationales are preferable for this task.
+
+Our contributions include:
+\begin{enumerate}[label=(\arabic*)]
+    \item An implementation of the parent methodology for sarcasm classification (replicating Oprea and B\^{a}ra's results);
+    \item A new explainability pipeline using LLM prompting to generate rationales post-prediction;
+    \item Quantitative and qualitative evaluation of explanation quality; and
+    \item A thorough discussion of how this explanation improves trust, along with limitations and future directions.
+\end{enumerate}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related_work} reviews the relevant literature on sarcasm detection and explainability in NLP\@. Section~\ref{sec:methodology} describes our methodology, including the extended pipeline. Section~\ref{sec:math_formulation} presents the mathematical formulation. Section~\ref{sec:algorithms} outlines the core algorithms. Section~\ref{sec:experimental_setup} details the experimental setup and baselines. Section~\ref{sec:results} presents our results. Section~\ref{sec:discussion} discusses the findings, limitations, and implications. Section~\ref{sec:conclusion} concludes the paper, and Section~\ref{sec:future_work} outlines future research directions.

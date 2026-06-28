@@ -1,0 +1,81 @@
+%%
+%% 06_algorithms.tex — Algorithms
+%%
+
+\section{Algorithms}\label{sec:algorithms}
+
+This section formalises the three core procedures of the proposed system in algorithmic form.
+
+%%% Algorithm 1: Training
+\begin{algorithm}[H]
+\caption{Training the Sarcasm Detector}\label{alg:training}
+\begin{algorithmic}[1]
+\Require Sarcasm datasets $D = \{(x_i, y_i)\}$ (Amazon reviews and news headlines); pre-trained transformer models $\mathcal{M} = \{\text{RoBERTa-large}, \text{RoBERTa-base}, \text{DistilBERT}, \text{DistilBERT-SST2}\}$; hyperparameters (learning rate $\eta$, batch size $B$, label smoothing $\alpha$, weight decay $\lambda$, patience $P=1$, max epochs $T=5$).
+\Ensure Four fine-tuned models $\{\theta^{*}_m\}_{m \in \mathcal{M}}$ with best validation F1 scores.
+\Statex
+\State \textbf{Preprocessing:} Normalise and tokenise all $x_i$ using \texttt{AutoTokenizer} (max length~$= 192$).
+\State Apply \texttt{GroupShuffleSplit} to create train / validation / test splits (70\% / 15\% / 15\%).
+\Statex
+\For{each model architecture $m \in \mathcal{M}$}
+    \State Initialise model parameters $\theta_0^{(m)}$ from pre-trained weights.
+    \State $\text{best\_F1} \gets 0$; $\text{no\_improve} \gets 0$
+    \For{epoch $t = 1, \ldots, T$}
+        \For{each mini-batch $(X_b, Y_b) \subset D_{\text{train}}$ of size $B$}
+            \State Compute logits $\mathbf{z} = W\, \mathbf{h}(X_b;\, \theta_t) + \mathbf{b}$
+            \State Compute label-smoothed loss $\mathcal{L}_{\text{CE}}$ (Eq.~\ref{eq:label_smoothed_ce}) with smoothing $\alpha$
+            \State Add L2 regularisation: $\mathcal{L} \gets \mathcal{L}_{\text{CE}} + \lambda\, \|\theta_t\|_2^2$ (biases/LayerNorm excluded)
+            \State Update $\theta_{t} \gets \text{AdamW}(\theta_{t},\, \nabla \mathcal{L},\, \eta)$ with cosine LR schedule and linear warmup
+        \EndFor
+        \State Evaluate macro-F1 on $D_{\text{val}}$
+        \If{$\text{F1}_{\text{val}} > \text{best\_F1}$}
+            \State $\text{best\_F1} \gets \text{F1}_{\text{val}}$; save checkpoint $\theta^{*}_m \gets \theta_t$; $\text{no\_improve} \gets 0$
+        \Else
+            \State $\text{no\_improve} \gets \text{no\_improve} + 1$
+        \EndIf
+        \If{$\text{no\_improve} \geq P$}
+            \State \textbf{break} \Comment{Early stopping}
+        \EndIf
+    \EndFor
+\EndFor
+\State \Return $\{\theta^{*}_m\}_{m \in \mathcal{M}}$
+\end{algorithmic}
+\end{algorithm}
+
+%%% Algorithm 2: Inference
+\begin{algorithm}[H]
+\caption{Inference for Sarcasm Classification}\label{alg:inference}
+\begin{algorithmic}[1]
+\Require New sentence $x$; pre-trained tokeniser; fine-tuned model $\theta^{*}$.
+\Ensure Predicted label $\hat{y}$ and class probability vector $\mathbf{p}$.
+\Statex
+\State Tokenise $x \to \mathbf{x}$ using \texttt{AutoTokenizer} (padding, truncation to max length~$= 192$).
+\State Forward pass: $\mathbf{z} \gets \theta^{*}(\mathbf{x})$ \Comment{Compute logits}
+\State Compute probabilities: $\mathbf{p} \gets \text{softmax}(\mathbf{z}) = [p_0,\, p_1]$
+\State Predict label: $\hat{y} \gets \arg\max_{c}\, p_c$
+\State \Return $\hat{y},\, \mathbf{p}$
+\end{algorithmic}
+\end{algorithm}
+
+%%% Algorithm 3: LLM Rationale Generation
+\begin{algorithm}[H]
+\caption{Generate LLM Rationale (Explainability)}\label{alg:rationale}
+\begin{algorithmic}[1]
+\Require Sentence $x$; predicted label $\hat{y}$; prediction probability $p(\hat{y})$; LLM language model; prompt template $\mathcal{T}$.
+\Ensure Natural-language rationale $r$.
+\Statex
+\State \textbf{Construct Prompt:}
+\State $\texttt{prompt} \gets \mathcal{T}(x,\, \hat{y},\, p(\hat{y}))$
+\Statex \Comment{Example: ``The sentence is: `$x$'. It was classified as $\hat{y}$ with confidence $p(\hat{y})$. Explain \emph{why} it is $\hat{y}$.''}
+\State Optionally append few-shot examples to \texttt{prompt}.
+\Statex
+\State \textbf{Generate Rationale:}
+\State $r \gets \text{LLM}(\texttt{prompt})$ \Comment{Sample via nucleus sampling or greedy decoding (temperature~$= 0$)}
+\Statex
+\State \textbf{Post-process:} Remove trivial preamble phrases from $r$ (optional).
+\State \Return $r$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{remark}
+In practice, Algorithm~\ref{alg:rationale} may be repeated multiple times (e.g.\ with different temperatures) for robustness, or used with temperature~$= 0$ for deterministic consistency. The rationale $r$ is appended to the classification output from Algorithm~\ref{alg:inference} to produce the final explainable prediction.
+\end{remark}

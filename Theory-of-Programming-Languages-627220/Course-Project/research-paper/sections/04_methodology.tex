@@ -1,0 +1,244 @@
+%%
+%% 04_methodology.tex — Methodology
+%%
+
+\section{Methodology}\label{sec:methodology}
+
+Our pipeline extends the parent work~\cite{oprea2025llm}. We first \textbf{replicate their training} procedure exactly:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Datasets:} We use the \emph{Sarcasm Amazon Reviews Corpus}~\cite{filatova2012irony} for product reviews (873 sarcastic, 817 non-sarcastic after cleaning) and a \emph{News Headlines} dataset (55{,}328 samples, approximately 47.6\% sarcastic). No new data is collected or changed.
+
+    \item \textbf{Preprocessing:} Raw text is normalised (lowercasing, whitespace collapse) and paired sarcastic/non-sarcastic reviews are grouped. A \texttt{GroupShuffleSplit} ensures no overlap across train/validation/test.
+
+    \item \textbf{Tokenisation and Embedding:} We use the HuggingFace \texttt{AutoTokenizer}~\cite{wolf2020transformers} with fixed-length padding/truncation ($\text{max length} = 192$). Token indices and attention masks are produced, and packed into a \texttt{DatasetDict} for training.
+
+    \item \textbf{Model Training:} We fine-tune four transformer architectures via HuggingFace \texttt{Trainer}: RoBERTa-large~\cite{liu2019roberta}, RoBERTa-base~\cite{liu2019roberta}, DistilBERT-base-uncased~\cite{sanh2019distilbert}, and DistilBERT-base-uncased-finetuned-SST2~\cite{sanh2019distilbert}. Each model has a binary classification head (Cross-Entropy loss with label smoothing factor~$\alpha$). Training uses AdamW with cosine learning rate schedule and linear warmup. We apply early stopping on validation macro-F1. The loss includes L2 weight decay (excluding biases and LayerNorm parameters).
+
+    \item \textbf{Evaluation:} After fine-tuning, each model outputs class probabilities via softmax. We compute Accuracy, Precision, Recall, and macro-averaged F1 on held-out test sets. These metrics replicate the parent's reported results, e.g.\ RoBERTa-base attains approximately 94.3\% accuracy, $\text{F1} = 0.9425$ on headlines; DistilBERT-SST2 obtains $\text{F1} \approx 0.8784$.
+\end{itemize}
+
+\subsection{Explainability Module}\label{subsec:explainability_module}
+
+We then \textbf{add the Explainability Module} \emph{post-hoc}. The enhanced pipeline is as follows (see Fig.~\ref{fig:proposed_pipeline}):
+
+\begin{enumerate}[label=\textbf{Step \arabic*:},leftmargin=*]
+    \item The model makes its prediction (Sarcastic/Non-Sarcastic) and outputs the softmax probabilities $\mathbf{p} = [p_{\text{Non}},\, p_{\text{Sar}}]$.
+
+    \item \emph{Without modifying the model weights}, we feed the same input (and optionally~$\mathbf{p}$) into an LLM explanation prompt. For instance:
+    \begin{quote}
+        \emph{``The sentence is: `[input text]'. The model predicted \textbf{[class]} with probability \textbf{$[\max(\mathbf{p})]$}. Provide a concise explanation in natural language why this sentence is [class], citing relevant cues (sentiment, context, lexical clues).''}
+    \end{quote}
+
+    \item The LLM (e.g.\ GPT-4~\cite{openai2023gpt4}) generates a rationale sentence. We may perform this once or use few-shot prompts to improve detail. The output is the final explanation.
+\end{enumerate}
+
+The final system outputs \emph{``[Class label] -- [Explanatory Rationale]''}. No retraining of the classifier is performed; the LLM acts as an external interpreter. In implementation, this could use the OpenAI API or an open-source LLM, but in our experiments we simulate this by prompting a strong model or using a smaller justification model (see Section~\ref{sec:experimental_setup}).
+
+\subsection{Sarcasm Indicators}\label{subsec:sarcasm_indicators}
+
+The Explanation Module is designed to highlight common sarcasm indicators:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Contextual incongruity:} Mismatch of situation vs.\ wording.
+    \item \textbf{Sentiment flip:} Positive word with negative intent.
+    \item \textbf{Irony markers:} e.g.\ hyperbole, scare quotes.
+    \item \textbf{Implicit meaning:} Unstated negative sentiment.
+    \item \textbf{Pragmatic cues:} Background knowledge informing interpretation.
+\end{itemize}
+
+For example, for the sentence \emph{``Great, another sunny Monday,''} the rationale may note the contrast between ``sunny'' (a positive weather term) and the speaker's tone of frustration about Monday (negative).
+
+\subsection{System Architecture}\label{subsec:system_architecture}
+
+Figure~\ref{fig:overall_architecture} shows the overall architecture of the proposed system, and Figure~\ref{fig:inference_pipeline} depicts the inference pipeline including the LLM explanation step.
+
+%%% --- Proposed Pipeline (TikZ) ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    box/.style={
+        rectangle,
+        draw=blue!60,
+        fill=blue!5,
+        rounded corners=3pt,
+        minimum width=4.5cm,
+        minimum height=0.9cm,
+        text centered,
+        font=\small
+    },
+    arrow/.style={
+        -Stealth,
+        thick,
+        blue!60
+    }
+]
+    \node[box] (input) {Input Sentence};
+    \node[box, below=of input] (preprocess) {Preprocessing};
+    \node[box, below=of preprocess] (tokenize) {Tokenisation};
+    \node[box, below=of tokenize] (encoder) {Transformer Encoder};
+    \node[box, below=of encoder] (prob) {Prediction Probability};
+    \node[box, below=of prob, fill=orange!10, draw=orange!60] (llm) {LLM Explainability Module};
+    \node[box, below=of llm, fill=green!10, draw=green!60] (rationale) {Natural Language Rationale};
+    \node[box, below=of rationale, fill=green!10, draw=green!60] (output) {Final Explainable Output};
+
+    \draw[arrow] (input) -- (preprocess);
+    \draw[arrow] (preprocess) -- (tokenize);
+    \draw[arrow] (tokenize) -- (encoder);
+    \draw[arrow] (encoder) -- (prob);
+    \draw[arrow] (prob) -- (llm);
+    \draw[arrow] (llm) -- (rationale);
+    \draw[arrow] (rationale) -- (output);
+\end{tikzpicture}
+\caption{Proposed system pipeline. The input sentence is preprocessed and tokenised, a transformer model predicts sarcasm probability, then an LLM-based Explainability Module generates a natural-language rationale, yielding the final label and explanation.}
+\label{fig:proposed_pipeline}
+\end{figure}
+
+%%% --- Overall Architecture (TikZ) ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.6cm and 1.2cm,
+    block/.style={
+        rectangle, draw=#1!70, fill=#1!8,
+        rounded corners=3pt, minimum width=2.8cm, minimum height=0.75cm,
+        text centered, font=\scriptsize
+    },
+    block/.default=blue,
+    arr/.style={-Stealth, thick, gray!70},
+    lbl/.style={font=\tiny\itshape, text=gray!80}
+]
+    %% --- Left: Encoder ---
+    \node[block=teal] (tok) {Token Embeddings};
+    \node[block=teal, below=of tok] (pos) {+ Position Embeddings};
+    \node[block=blue, below=of pos] (enc1) {Transformer Layer 1};
+    \node[block=blue, below=of enc1] (enc2) {Transformer Layer 2};
+    \node[lbl, below=0.15cm of enc2] (dots) {$\vdots$};
+    \node[block=blue, below=0.15cm of dots] (encN) {Transformer Layer $N$};
+    \node[block=violet, below=of encN] (cls) {[CLS] Representation $\mathbf{h}$};
+
+    %% --- Right: Classification Head ---
+    \node[block=red, right=2cm of cls] (head) {Classification Head};
+    \node[block=red, below=of head] (soft) {Softmax};
+    \node[block=red, below=of soft] (pred) {$\hat{y},\ \mathbf{p}$};
+
+    %% --- Far Right: Explainability ---
+    \node[block=orange, right=1.8cm of head] (prompt) {LLM Prompt};
+    \node[block=orange, below=of prompt] (llm) {LLM (GPT-4)};
+    \node[block=green!60!black, below=of llm] (rat) {Rationale $r$};
+
+    %% --- Arrows ---
+    \draw[arr] (tok) -- (pos);
+    \draw[arr] (pos) -- (enc1);
+    \draw[arr] (enc1) -- (enc2);
+    \draw[arr] (encN) -- (cls);
+    \draw[arr] (cls) -- (head);
+    \draw[arr] (head) -- (soft);
+    \draw[arr] (soft) -- (pred);
+    \draw[arr] (pred.east) -- ++(0.5,0) |- (prompt.west);
+    \draw[arr] (prompt) -- (llm);
+    \draw[arr] (llm) -- (rat);
+
+    %% --- Labels ---
+    \node[lbl, above=0.1cm of tok] {Input Tokens};
+    \node[lbl, right=0.1cm of pred] {};
+
+    %% --- Bounding boxes ---
+    \begin{scope}[on background layer]
+        \node[draw=blue!40, dashed, rounded corners=5pt, inner sep=6pt,
+              fit=(tok)(pos)(enc1)(enc2)(encN)(cls),
+              label={[font=\scriptsize\bfseries, blue!60]above:Transformer Encoder}] {};
+        \node[draw=red!40, dashed, rounded corners=5pt, inner sep=6pt,
+              fit=(head)(soft)(pred),
+              label={[font=\scriptsize\bfseries, red!60]above:Classification}] {};
+        \node[draw=orange!50, dashed, rounded corners=5pt, inner sep=6pt,
+              fit=(prompt)(llm)(rat),
+              label={[font=\scriptsize\bfseries, orange!70]above:Explainability Module}] {};
+    \end{scope}
+\end{tikzpicture}
+\caption{Overall architecture of the proposed explainable sarcasm detection system. The left portion shows the Transformer encoder processing input tokens; the centre shows the task-specific classification head producing predictions; the right shows the post-hoc LLM explainability module generating natural-language rationales.}
+\label{fig:overall_architecture}
+\end{figure}
+
+%%% --- Training Pipeline (TikZ) ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.7cm,
+    box/.style={
+        rectangle, draw=blue!60, fill=blue!5,
+        rounded corners=3pt, minimum width=4.2cm, minimum height=0.8cm,
+        text centered, font=\small
+    },
+    decision/.style={
+        diamond, draw=purple!60, fill=purple!5,
+        minimum width=2.2cm, minimum height=1cm,
+        text centered, font=\scriptsize, aspect=2.5
+    },
+    arrow/.style={-Stealth, thick, blue!60}
+]
+    \node[box, fill=teal!8, draw=teal!60] (data) {Load Datasets};
+    \node[box, below=of data] (preproc) {Preprocessing \& Normalisation};
+    \node[box, below=of preproc] (tokenise) {Tokenisation (AutoTokenizer)};
+    \node[box, below=of tokenise] (split) {GroupShuffleSplit (70/15/15)};
+    \node[box, below=of split, fill=orange!8, draw=orange!60] (finetune) {Fine-tune Transformer (AdamW)};
+    \node[decision, below=0.8cm of finetune] (improve) {F1 improved?};
+    \node[box, right=2cm of improve, fill=green!8, draw=green!60] (save) {Save Best Checkpoint};
+    \node[decision, below=0.8cm of improve] (patience) {Patience exceeded?};
+    \node[box, below=0.8cm of patience, fill=green!10, draw=green!60] (output) {Output: Fine-tuned $\theta^*_m$};
+
+    \draw[arrow] (data) -- (preproc);
+    \draw[arrow] (preproc) -- (tokenise);
+    \draw[arrow] (tokenise) -- (split);
+    \draw[arrow] (split) -- (finetune);
+    \draw[arrow] (finetune) -- (improve);
+    \draw[arrow] (improve) -- node[right, font=\scriptsize]{No} (patience);
+    \draw[arrow] (improve) -- node[above, font=\scriptsize]{Yes} (save);
+    \draw[arrow] (save.north) |- ([yshift=0.3cm]finetune.east) -- (finetune.east);
+    \draw[arrow] (patience) -- node[right, font=\scriptsize]{Yes} (output);
+    \draw[arrow] (patience.west) -- ++(-1.5,0) node[above, font=\scriptsize]{No} |- (finetune.west);
+\end{tikzpicture}
+\caption{Training pipeline flowchart. Data is loaded, preprocessed, and tokenised. Models are fine-tuned with AdamW and early stopping based on validation macro-F1. The best checkpoint is saved for each architecture.}
+\label{fig:training_pipeline}
+\end{figure}
+
+%%% --- Inference Pipeline (TikZ) ---
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.7cm and 2cm,
+    box/.style={
+        rectangle, draw=blue!60, fill=blue!5,
+        rounded corners=3pt, minimum width=3.8cm, minimum height=0.8cm,
+        text centered, font=\small
+    },
+    arrow/.style={-Stealth, thick, blue!60}
+]
+    \node[box] (input) {Input Sentence $x$};
+    \node[box, below=of input] (tok) {Tokenise $x \to \mathbf{x}$};
+    \node[box, below=of tok] (model) {Forward Pass: $\theta^*(\mathbf{x})$};
+    \node[box, below=of model] (softmax) {Softmax $\to \mathbf{p}$};
+    \node[box, below=of softmax] (predict) {$\hat{y} = \arg\max_c\, p_c$};
+
+    %% Explanation branch
+    \node[box, right=2cm of predict, fill=orange!8, draw=orange!60] (prompt) {Construct LLM Prompt};
+    \node[box, below=of prompt, fill=orange!8, draw=orange!60] (llm) {Query LLM};
+    \node[box, below=of llm, fill=green!10, draw=green!60] (rationale) {Rationale $r$};
+
+    %% Final output
+    \node[box, below=1cm of predict, fill=green!10, draw=green!60, minimum width=8.5cm] (final) {Final Output: $\hat{y}$ + Rationale $r$};
+
+    \draw[arrow] (input) -- (tok);
+    \draw[arrow] (tok) -- (model);
+    \draw[arrow] (model) -- (softmax);
+    \draw[arrow] (softmax) -- (predict);
+    \draw[arrow] (predict) -- (prompt);
+    \draw[arrow] (prompt) -- (llm);
+    \draw[arrow] (llm) -- (rationale);
+    \draw[arrow] (predict) -- (final);
+    \draw[arrow] (rationale.south) |- (final.east);
+\end{tikzpicture}
+\caption{Inference and explanation flowchart. The trained model produces a label and class probabilities; these, along with the input, are sent to an LLM prompt which returns a textual explanation. Both the label and the rationale comprise the final output.}
+\label{fig:inference_pipeline}
+\end{figure}

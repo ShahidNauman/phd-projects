@@ -1,0 +1,110 @@
+%%
+%% main.tex — Master document for Springer SN Computer Science submission
+%% Title: Beyond Classification: Integrating LLM-Generated Rationales
+%%        for Explainable Sarcasm Detection
+%%
+
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+%%%=== Required Packages ===%%%
+\usepackage{graphicx}          % figures
+\usepackage{amsmath,amssymb}   % mathematics
+\usepackage{booktabs}          % professional tables
+\usepackage{multirow}          % multi-row cells
+\usepackage{array}             % extended column formats
+\usepackage{algorithm}         % algorithm floats
+\usepackage{algpseudocode}     % algorithmic pseudocode
+\usepackage{tikz}              % diagrams
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, calc, backgrounds}
+\usepackage{pgfplots}          % data plots
+\pgfplotsset{compat=1.18}
+\usepackage{subcaption}        % subfigures
+\usepackage{float}             % [H] placement
+\usepackage{longtable}         % multi-page tables
+\usepackage{tabularx}          % auto-width tables
+\usepackage{xcolor}            % colours
+\usepackage{hyperref}          % clickable cross-references
+\usepackage{enumitem}          % list customisation
+\usepackage{siunitx}           % SI units and number formatting
+\usepackage{url}               % URL typesetting
+\usepackage{textcomp}          % additional text symbols
+\usepackage{mathtools}         % extends amsmath
+
+%%% hyperref settings
+\hypersetup{
+  colorlinks  = true,
+  linkcolor   = blue!70!black,
+  citecolor   = green!50!black,
+  urlcolor    = magenta!70!black,
+  bookmarks   = true,
+  pdfauthor   = {},
+  pdftitle    = {Beyond Classification: Integrating LLM-Generated Rationales for Explainable Sarcasm Detection},
+  pdfsubject  = {Explainable AI, Sarcasm Detection, LLM Rationales},
+  pdfkeywords = {Sarcasm Detection, Explainable AI, Large Language Models, Rationales, Transformer, Post-hoc Explanation}
+}
+
+%%%=== Metadata ===%%%
+\jyear{2026}
+
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{thmstyletwo}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+%%%=== Begin Document ===%%%
+\begin{document}
+
+\title[Integrating LLM-Generated Rationales for Explainable Sarcasm Detection]{Beyond Classification: Integrating LLM-Generated Rationales for Explainable Sarcasm Detection}
+
+%%% Authors — replace placeholders with real names and affiliations
+\author*[1]{\fnm{First} \sur{Author}}\email{first.author@institution.edu}
+\author[2]{\fnm{Second} \sur{Author}}\email{second.author@institution.edu}
+
+\affil*[1]{\orgdiv{Department of Computer Science},
+           \orgname{University Name},
+           \orgaddress{\city{City}, \postcode{00000}, \country{Country}}}
+
+\affil[2]{\orgdiv{Department of Artificial Intelligence},
+           \orgname{University Name},
+           \orgaddress{\city{City}, \postcode{00000}, \country{Country}}}
+
+%%% Abstract
+\input{sections/01_abstract}
+
+%%% Keywords
+\keywords{Sarcasm Detection \and Explainable AI \and Large Language Models \and Rationales \and Transformer \and Post-hoc Explanation}
+
+\maketitle
+
+%%% Main Body Sections
+\input{sections/02_introduction}
+\input{sections/03_related_work}
+\input{sections/04_methodology}
+\input{sections/05_mathematical_formulation}
+\input{sections/06_algorithms}
+\input{sections/07_experimental_setup}
+\input{sections/08_results}
+\input{sections/09_discussion}
+\input{sections/10_conclusion}
+\input{sections/11_future_work}
+
+%%% Appendices
+\appendix
+\input{appendices/nomenclature}
+
+%%% Acknowledgements (optional)
+\begin{acknowledgements}
+The authors would like to thank the reviewers for their constructive feedback. This work builds upon the open-source sarcasm detection framework of Oprea and B\^{a}ra (2025).
+\end{acknowledgements}
+
+%%% Bibliography
+\bibliographystyle{sn-mathphys-num}
+\bibliography{references}
+
+\end{document}

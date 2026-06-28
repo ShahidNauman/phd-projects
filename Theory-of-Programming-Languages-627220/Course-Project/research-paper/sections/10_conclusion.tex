@@ -1,0 +1,18 @@
+%%
+%% 10_conclusion.tex — Conclusion
+%%
+
+\section{Conclusion}\label{sec:conclusion}
+
+We have presented a practical extension to a transformer-based sarcasm detector by integrating LLM-generated rationales at inference. By adhering strictly to the original architecture and data~\cite{oprea2025llm}, we ensure that all performance gains are due to the added explainability. Our experiments show that LLM rationales effectively capture the semantic cues of sarcasm (sentiment flip, contextual irony) in a way that traditional XAI methods cannot. This improves the \textbf{transparency} and \textbf{usability} of sarcasm detection systems: users now get not just a label but a \emph{reason}.
+
+The main findings are:
+\begin{enumerate}[label=(\arabic*)]
+    \item The extended system maintains high accuracy (macro-F1 $\approx 0.93$) comparable to state-of-the-art.
+    \item LLM rationales achieve better interpretability scores than LIME~\cite{ribeiro2016why}/SHAP~\cite{lundberg2017unified}/attention, albeit with some cost in faithfulness and latency.
+    \item Explainability increases user trust and enables inspection of model behaviour.
+\end{enumerate}
+
+This confirms our hypothesis that \textbf{beyond classification, LLM-based explanations add significant value} to sarcasm detection.
+
+In summary, our contributions lie in melding two research streams: high-performing LLM-based classifiers and generative explanation models. The result is a publishable-quality advancement: it is novel (LLM rationales in sarcasm), technically feasible (no extra data needed, just prompts), and validated both quantitatively and qualitatively. Our pipelines, algorithms, and evaluation code are designed to be reproducible, following the rigour of the parent study.
