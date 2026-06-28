@@ -10,8 +10,7 @@ We use exactly the same data as the parent study~\cite{oprea2025llm}. The Amazon
 
 Implementation is done in Python using PyTorch and HuggingFace Transformers~\cite{wolf2020transformers}. All four models are fine-tuned on an NVIDIA GPU (e.g.\ RTX~4080) for up to 5 epochs (with early stopping). Hyperparameters (learning rate, batch size, $\alpha$ for label smoothing, weight decay) follow the parent's settings; we list them in Table~\ref{tab:hyperparameters}.
 
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
 \caption{Hyperparameter settings and training configuration.}
 \label{tab:hyperparameters}
 \begin{tabular}{ll}
@@ -57,7 +56,8 @@ We use (or simulate) a strong instruction-following LLM~\cite{openai2023gpt4} (e
 
 \begin{quote}
 \small
-\texttt{Sentence: "\textless input text\textgreater"}\\
+\texttt{Sentence: "\char60 input text\char62"}\\
+
 \texttt{Model prediction: Sarcastic (confidence 0.92)}\\
 \texttt{Explain *why* the model predicted Sarcastic, mentioning relevant cues.}
 \end{quote}
@@ -65,8 +65,7 @@ We use (or simulate) a strong instruction-following LLM~\cite{openai2023gpt4} (e
 We frame the reasoning steps to cover both surface sentiment and implied meaning, drawing on linguistic patterns described in the sarcasm detection literature. We tune few-shot examples (if any) on a held-out set. In case API limitations apply, we may use open models (e.g.\ GPT-J) to approximate, but for demonstration we assume a capable LLM.
 
 %%% Dataset Statistics Table
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
 \caption{Dataset statistics for the News Headlines and Amazon Reviews corpora used in this study.}
 \label{tab:dataset_stats}
 \begin{tabular}{lrrr}

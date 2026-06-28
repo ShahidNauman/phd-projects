@@ -8,20 +8,20 @@
 
 Our re-implementation reproduces the parent's classification results within 0.5\%. Table~\ref{tab:classification_results} reports performance of the four models (test set averaged across domains). These match the macro-F1 scores reported by Oprea and B\^{a}ra~\cite{oprea2025llm} (e.g.\ RoBERTa-base: $\text{F1} \approx 0.94$, DistilBERT-SST2: $\text{F1} \approx 0.88$). There is no significant drop when adding the explainability step, since the model weights remain unchanged.
 
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
+\setlength{\tabcolsep}{4pt}
 \caption{Classification results on test sets (averaged across domains). The parent study reported macro-F1 $= 0.8784$ for DistilBERT-SST2; our replicated models achieve similar or higher F1 (likely due to slight implementation differences or dataset splits).}
 \label{tab:classification_results}
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Model} & \textbf{Accuracy (\%)} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{Macro-F1 (\%)} & \textbf{AUC (ROC)} \\
+\textbf{Model} & \textbf{Acc. (\%)} & \textbf{Prec. (\%)} & \textbf{Rec. (\%)} & \textbf{Macro-F1 (\%)} & \textbf{AUC (ROC)} \\
 \midrule
 RoBERTa-large                & 93.5 & 94.0 & 93.3 & 93.6 & 0.96 \\
 RoBERTa-base                 & 94.1 & 93.9 & 94.2 & 94.0 & 0.97 \\
 DistilBERT                   & 92.0 & 91.5 & 92.3 & 91.9 & 0.95 \\
 DistilBERT-SST2              & 92.8 & 92.5 & 92.8 & 92.6 & 0.96 \\
 \midrule
-Parent~\cite{oprea2025llm} (reference) & --   & --   & --   & 87.84 (SST2) & -- \\
+Parent~\cite{oprea2025llm} & --   & --   & --   & 87.84 (SST2) & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -29,7 +29,7 @@ Parent~\cite{oprea2025llm} (reference) & --   & --   & --   & 87.84 (SST2) & -- 
 Figure~\ref{fig:confusion_matrix} shows the confusion matrix for RoBERTa-base on the test set. Both classes are balanced in prediction. We observe that most errors are due to subtle cases (e.g.\ sarcastic sentences without obvious markers). RoBERTa-base slightly outperforms the smaller models (as expected). DistilBERT-SST2, while smallest, remains competitive due to its sentiment priors. Overall, the baseline performance is high and on par with the state-of-the-art.
 
 %%% Confusion Matrix (TikZ)
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[font=\small]
     \def\cmsize{1.8}
@@ -58,7 +58,7 @@ Figure~\ref{fig:confusion_matrix} shows the confusion matrix for RoBERTa-base on
 \end{figure}
 
 %%% ROC Curves (pgfplots)
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -112,7 +112,7 @@ Figure~\ref{fig:confusion_matrix} shows the confusion matrix for RoBERTa-base on
 \end{figure}
 
 %%% Precision/Recall Bar Chart (pgfplots)
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -172,12 +172,10 @@ For qualitative analysis, Table~\ref{tab:explanation_examples} presents example 
 \textbf{Prediction:} Non-Sarcastic (0.90). \textbf{LLM Rationale:} ``The model predicted non-sarcastic because the sentence literally praises the service using positive superlative language. There are no obvious hints of sarcasm (no negative context or contradictory words).''
 \end{example}
 
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
 \caption{Case study examples showing predictions, confidences, and LLM-generated explanations (rationales) alongside human interpretations. The LLM rationales correctly identify cues such as sentiment contradiction or sincerity.}
 \label{tab:explanation_examples}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{p{5cm} c c p{7cm} p{5cm}}
+\begin{tabular}{p{2.4cm} c c p{3.7cm} p{2.8cm}}
 \toprule
 \textbf{Sentence} & \textbf{Label} & \textbf{Conf.} & \textbf{LLM Explanation (generated)} & \textbf{Human Explanation} \\
 \midrule
@@ -187,8 +185,7 @@ For qualitative analysis, Table~\ref{tab:explanation_examples} presents example 
 \midrule
 ``The service here is literally the best I've ever had!'' (said with a frown) & Non-Sar. & 0.90 & Predicted non-sarcastic: the phrase straightforwardly praises the service (`best I've ever had'). There are no ironic cues or contradictory words, so it is taken literally. & The statement is literal praise with no hidden negative intent. \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
 \subsection{Explanation Faithfulness}\label{subsec:faithfulness}
@@ -216,8 +213,7 @@ We evaluated each method on 500 test sentences (randomly chosen from all domains
 
 Adding the explanation step does increase runtime. On average, classification alone takes approximately \SI{5}{\milli\second}/sentence (DistilBERT) vs.\ approximately \SI{20}{\milli\second} for RoBERTa. Querying the LLM (via API or local inferencing) adds approximately \SIrange{100}{200}{\milli\second} per sentence for a single-shot query. Thus end-to-end latency is on the order of \SIrange{0.1}{0.2}{\second} per instance, which is acceptable for many applications. Table~\ref{tab:latency} lists average latencies.
 
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
 \caption{Inference latency (excluding data load) for different explanation methods (DistilBERT model on RTX~4080 GPU). LLM-based explanation adds roughly \SIrange{0.1}{0.25}{\second} per example.}
 \label{tab:latency}
 \begin{tabular}{lll}
@@ -239,8 +235,7 @@ Note that simple methods (attention, IG) add negligible time, while LIME/SHAP wi
 
 To isolate the effect of explanation, we perform an ablation: comparing \textbf{(A)}~baseline classifier alone, \textbf{(B)}~classifier + attention-based explanation, \textbf{(C)}~classifier + SHAP, \textbf{(D)}~classifier + LIME, \textbf{(E)}~classifier + LLM rationale (ours). The metric of interest is not classification accuracy (unchanged) but \emph{explanation fidelity} and \emph{user preference}. For a subset of 100 instances, human evaluators scored each method's explanation correctness (does it cite a relevant cause?) and usefulness (1--5 scale).
 
-\begin{table}[H]
-\centering
+\begin{table}[htbp]
 \caption{Ablation study results: human evaluation scores (1--5 scale) for explanation correctness and usefulness across different post-hoc XAI methods.}
 \label{tab:ablation}
 \begin{tabular}{lcc}

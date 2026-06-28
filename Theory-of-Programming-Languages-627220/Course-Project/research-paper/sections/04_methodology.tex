@@ -54,7 +54,7 @@ For example, for the sentence \emph{``Great, another sunny Monday,''} the ration
 Figure~\ref{fig:overall_architecture} shows the overall architecture of the proposed system, and Figure~\ref{fig:inference_pipeline} depicts the inference pipeline including the LLM explanation step.
 
 %%% --- Proposed Pipeline (TikZ) ---
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     node distance=0.8cm,
@@ -96,7 +96,7 @@ Figure~\ref{fig:overall_architecture} shows the overall architecture of the prop
 \end{figure}
 
 %%% --- Overall Architecture (TikZ) ---
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     node distance=0.6cm and 1.2cm,
@@ -119,12 +119,12 @@ Figure~\ref{fig:overall_architecture} shows the overall architecture of the prop
     \node[block=violet, below=of encN] (cls) {[CLS] Representation $\mathbf{h}$};
 
     %% --- Right: Classification Head ---
-    \node[block=red, right=2cm of cls] (head) {Classification Head};
+    \node[block=red, right=1.4cm of cls] (head) {Classification Head};
     \node[block=red, below=of head] (soft) {Softmax};
     \node[block=red, below=of soft] (pred) {$\hat{y},\ \mathbf{p}$};
 
     %% --- Far Right: Explainability ---
-    \node[block=orange, right=1.8cm of head] (prompt) {LLM Prompt};
+    \node[block=orange, right=1.2cm of head] (prompt) {LLM Prompt};
     \node[block=orange, below=of prompt] (llm) {LLM (GPT-4)};
     \node[block=green!60!black, below=of llm] (rat) {Rationale $r$};
 
@@ -162,7 +162,7 @@ Figure~\ref{fig:overall_architecture} shows the overall architecture of the prop
 \end{figure}
 
 %%% --- Training Pipeline (TikZ) ---
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     node distance=0.7cm,
@@ -204,7 +204,7 @@ Figure~\ref{fig:overall_architecture} shows the overall architecture of the prop
 \end{figure}
 
 %%% --- Inference Pipeline (TikZ) ---
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
     node distance=0.7cm and 2cm,

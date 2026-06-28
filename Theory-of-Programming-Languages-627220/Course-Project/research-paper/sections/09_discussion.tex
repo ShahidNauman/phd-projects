@@ -44,12 +44,10 @@ Overall, our explainability module turns a black-box classifier into a semi-tran
 
 Table~\ref{tab:comparison_existing} compares our work to key prior systems and surveys in the context of sarcasm detection and XAI\@.
 
-\begin{table}[H]
-\centering
+\begin{sidewaystable}[p]
 \caption{Comparison of our work with key prior systems in sarcasm detection and explainable AI.}
 \label{tab:comparison_existing}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{p{3cm} c p{3cm} p{3cm} p{3cm} p{4.5cm}}
+\begin{tabular}{p{2.2cm} c p{2.2cm} p{2.5cm} p{2.8cm} p{4.5cm}}
 \toprule
 \textbf{Work} & \textbf{Year} & \textbf{Task} & \textbf{Key Models} & \textbf{XAI Approach} & \textbf{Improvements in Proposed Work} \\
 \midrule
@@ -65,8 +63,7 @@ Inoue~\emph{et~al.}~\cite{inoue2026lime} & 2026 & General NLP & LLMs (Claude, GP
 \midrule
 Bilal~\emph{et~al.}~\cite{bilal2025llms} & 2025 & Survey (LLM for XAI) & -- & -- & Instantiates survey ideas in a concrete sarcasm use-case \\
 \bottomrule
-\end{tabular}%
-}
-\end{table}
+\end{tabular}
+\end{sidewaystable}
 
 Our work is unique in applying \textbf{LLM-as-explainer} specifically to sarcasm detection models, bridging the gap between the classification performance of~\cite{oprea2025llm} and the interpretability demands of~\cite{bilal2025llms,kumar2021explainable}. We demonstrate that this extension is \textbf{scientifically justified} (leveraging recent XAI advances) and \textbf{feasible} on the given datasets.
