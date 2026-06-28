@@ -25,24 +25,70 @@ Bueno~\emph{et~al.}~\cite{bueno2026scoring} propose combining model-agnostic fea
 Table~\ref{tab:literature_comparison} contrasts key recent studies (including the parent paper) on sarcasm detection and explainability.
 
 \begin{sidewaystable}[p]
-\caption{Comparison of related work on sarcasm detection and explainability.}
+\caption{Comparison of recent studies on sarcasm detection and explainability.}
 
 \label{tab:literature_comparison}
-\begin{tabular}{p{1.9cm} p{2.1cm} p{1.9cm} p{1.5cm} p{2.7cm} p{2.7cm} p{3.2cm}}
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{2}
+\newcolumntype{L}[1]{>{\RaggedRight\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{#1}}
+\begin{tabular}{L{1.8cm} L{2.4cm} L{2.2cm} L{2.2cm} L{2.6cm} L{2.6cm} L{2.6cm}}
 \toprule
-\textbf{Authors (Year)} & \textbf{Dataset} & \textbf{Model} & \textbf{Explain.} & \textbf{Advantages} & \textbf{Limitations} & \textbf{Contributions} \\
+\textbf{Authors (Year)} &
+\textbf{Dataset} &
+\textbf{Model} &
+\textbf{Explainability} &
+\textbf{Advantages} &
+\textbf{Limitations} &
+\textbf{Contributions} \\
 \midrule
-Oprea \& B\^{a}ra~\cite{oprea2025llm} (2025) & News headlines (55k), Amazon reviews & RoBERTa-large/base, DistilBERT, DistilBERT-SST2 & None (baseline) & Systematic evaluation of multiple transformers; group-aware splits; high macro-F1 ($>0.94$) & No model interpretability beyond reproducible pipeline & Provides a robust, reproducible baseline for sarcasm classification \\
+Oprea \& B\^{a}ra (2025) &
+News Headlines (Kaggle, 55k), Amazon Reviews (Sarcasm Amazon) &
+RoBERTa-large, RoBERTa-base, DistilBERT, DistilBERT-SST2 (fine-tuned) &
+\textit{None (baseline classification)} &
+\textbf{Systematic evaluation} of multiple transformers; group-aware splits; high macro-F1 ($>$0.94). &
+No model interpretability beyond a reproducible classification pipeline. &
+Provides a robust and reproducible baseline for sarcasm classification. \\
 \midrule
-Kumar~\emph{et~al.}~\cite{kumar2021explainable} (2021) & MUStARD dialogue corpus & XGBoost & LIME, SHAP & Contextual dialogue sarcasm; highlights word-level influence & Uses classic ML; limited by hand-crafted features & Shows interpretability in conversation sarcasm \\
+Kumar et al. (2021) &
+MUStARD dialogue corpus &
+XGBoost using ensemble features &
+LIME and SHAP (post-hoc token importance) &
+\textbf{Context-aware dialogue} sarcasm detection with word-level explanations using LIME and SHAP. &
+Relies on handcrafted features and classical machine learning rather than deep neural models. &
+Demonstrates that contextual information improves sarcasm detection while providing interpretable explanations. \\
 \midrule
-Bagate~\emph{et~al.}~\cite{bagate2025sarcasm} (2025) & Reddit political (self-annotated) & LSTM + SVC fusion & Counterfactual & Domain focus; ensemble improves F1; counterfactual highlights key words & Costly counterfactual search; only word highlighting & Introduces counterfactual XAI to identify sarcasm-driving words \\
+Bagate et al. (2025) &
+Self-annotated Reddit political corpus &
+LSTM + SVC fusion &
+Counterfactual explanation using word permutations &
+\textbf{Domain-specific} political sarcasm detection; ensemble improves F1; counterfactuals identify influential words. &
+Counterfactual generation is computationally expensive and explanations remain word-based. &
+Introduces counterfactual explainability for identifying words responsible for sarcasm. \\
 \midrule
-Bueno~\emph{et~al.}~\cite{bueno2026scoring} (2026) & CLASS teaching transcripts & Fine-tuned PLMs, LLMs & SHAP + LLM rationales & Combines SHAP \& LLM; develops evaluation framework & Focus on scoring, not sarcasm; LLM rationales less faithful & Demonstrates methodologies to evaluate LLM explanations \\
+Bueno et al. (2026) &
+Teaching transcripts (CLASS dataset) &
+Fine-tuned transformer PLMs and prompted LLMs &
+SHAP and LLM rationale evaluation &
+\textbf{Compares SHAP with LLM-generated explanations} and proposes a systematic evaluation framework. &
+Focuses on educational scoring rather than sarcasm; LLM explanations found less faithful. &
+Introduces deletion-based evaluation methods for assessing explanation faithfulness. \\
 \midrule
-Inoue~\emph{et~al.}~\cite{inoue2026lime} (2026) & SST-2, CoLA, HateXplain & LLMs (Claude, GPT) & LIME-LLM & Generative LIME; outperforms LIME/SHAP; high alignment with human rationales & Requires LLM calls per sample; not tested on sarcasm & Shows LLM-generated counterfactuals improve explanation fidelity \\
+Inoue et al. (2026) &
+SST-2, CoLA, HateXplain &
+LLMs (Claude, GPT) &
+LIME-LLM (LLM-generated counterfactuals) &
+\textbf{Generative counterfactual explanations} outperform conventional LIME/SHAP and align well with human rationales. &
+Requires repeated LLM inference for every instance and has not been evaluated on sarcasm datasets. &
+Shows that LLM-generated counterfactuals substantially improve explanation fidelity. \\
 \midrule
-\textbf{This work (2026)} & Same as~\cite{oprea2025llm} & Same transformers (fine-tuned) & LLM-generated textual rationales & LLM rationale provides human-readable explanations; retains original accuracy & Dependent on LLM availability; faithfulness must be measured & Extends prior pipeline by adding practical LLM-based XAI module \\
+\textit{This work (2026)} &
+Same datasets as Oprea \& B\^{a}ra (2025) &
+Same fine-tuned transformers &
+LLM-generated textual rationales (post-hoc) &
+Produces \textbf{human-readable explanations} of sarcasm cues while maintaining classification performance. &
+Dependent on LLM availability; explanation faithfulness must be quantitatively validated. &
+Extends the existing sarcasm detection pipeline with an LLM-based explainability module that bridges prediction and interpretation. \\
 \bottomrule
 \end{tabular}
 \end{sidewaystable}

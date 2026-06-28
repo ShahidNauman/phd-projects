@@ -175,7 +175,8 @@ For qualitative analysis, Table~\ref{tab:explanation_examples} presents example 
 \begin{table}[htbp]
 \caption{Case study examples showing predictions, confidences, and LLM-generated explanations (rationales) alongside human interpretations. The LLM rationales correctly identify cues such as sentiment contradiction or sincerity.}
 \label{tab:explanation_examples}
-\begin{tabular}{p{2.4cm} c c p{3.7cm} p{2.8cm}}
+\newcolumntype{L}[1]{>{\RaggedRight\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{#1}}
+\begin{tabular}{L{2.4cm} c c L{3.7cm} L{2.8cm}}
 \toprule
 \textbf{Sentence} & \textbf{Label} & \textbf{Conf.} & \textbf{LLM Explanation (generated)} & \textbf{Human Explanation} \\
 \midrule

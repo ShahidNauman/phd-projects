@@ -47,7 +47,9 @@ Table~\ref{tab:comparison_existing} compares our work to key prior systems and s
 \begin{sidewaystable}[p]
 \caption{Comparison of our work with key prior systems in sarcasm detection and explainable AI.}
 \label{tab:comparison_existing}
-\begin{tabular}{p{2.2cm} c p{2.2cm} p{2.5cm} p{2.8cm} p{4.5cm}}
+\renewcommand{\arraystretch}{2}
+\newcolumntype{L}[1]{>{\RaggedRight\hyphenpenalty=10000\exhyphenpenalty=10000\arraybackslash}p{#1}}
+\begin{tabular}{L{2.3cm} c L{2.4cm} L{2.5cm} L{2.8cm} L{4.5cm}}
 \toprule
 \textbf{Work} & \textbf{Year} & \textbf{Task} & \textbf{Key Models} & \textbf{XAI Approach} & \textbf{Improvements in Proposed Work} \\
 \midrule
