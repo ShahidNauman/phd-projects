@@ -13,7 +13,7 @@ research-paper/
 ├── sections/
 │   ├── 01_abstract.tex
 │   ├── 02_introduction.tex
-│   ├── 03_related_work.tex
+│   ├── 03_literature_review.tex
 │   ├── 04_methodology.tex      ← Contains TikZ pipeline diagram
 │   ├── 05_mathematical_formulation.tex
 │   ├── 06_algorithms.tex       ← Algorithms 1, 2, 3
@@ -39,7 +39,6 @@ research-paper/
 
 1. **Download the Springer Nature LaTeX template** from:
    https://www.springernature.com/gp/authors/campaigns/latex-author-support
-   
 2. Extract `sn-jnl.cls` and `sn-mathphys-num.bst` from the downloaded ZIP.
 
 3. Upload this entire project folder to Overleaf.
@@ -64,15 +63,15 @@ pdflatex main.tex
 
 The following figures are referenced in the paper but require external files:
 
-| Figure | Filename | Description |
-|--------|----------|-------------|
-| Fig. 1 | *(TikZ inline)* | Proposed pipeline — generated automatically |
-| Fig. 2 | `figures/overall_architecture.pdf` | Overall system architecture |
-| Fig. 3 | `figures/training_pipeline.pdf` | Training pipeline flowchart |
-| Fig. 4 | `figures/inference_pipeline.pdf` | Inference + explanation flowchart |
-| Fig. 5 | `figures/confusion_matrix_roberta_base.pdf` | Confusion matrix (RoBERTa-base) |
-| Fig. 6 | `figures/roc_curves.pdf` | ROC curves for all models |
-| Fig. 7 | `figures/precision_recall_comparison.pdf` | Precision/Recall comparison |
+| Figure | Filename                                    | Description                                 |
+| ------ | ------------------------------------------- | ------------------------------------------- |
+| Fig. 1 | _(TikZ inline)_                             | Proposed pipeline — generated automatically |
+| Fig. 2 | `figures/overall_architecture.pdf`          | Overall system architecture                 |
+| Fig. 3 | `figures/training_pipeline.pdf`             | Training pipeline flowchart                 |
+| Fig. 4 | `figures/inference_pipeline.pdf`            | Inference + explanation flowchart           |
+| Fig. 5 | `figures/confusion_matrix_roberta_base.pdf` | Confusion matrix (RoBERTa-base)             |
+| Fig. 6 | `figures/roc_curves.pdf`                    | ROC curves for all models                   |
+| Fig. 7 | `figures/precision_recall_comparison.pdf`   | Precision/Recall comparison                 |
 
 **To compile without these files**, comment out the corresponding
 `\includegraphics` lines or create blank placeholder PDFs.
